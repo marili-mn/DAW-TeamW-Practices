@@ -1,0 +1,140 @@
+<p-button
+  label="Volver a proyectos"
+  icon="pi pi-arrow-left"
+  [text]="true"
+  size="small"
+  routerLink="/proyectos"
+/>
+
+@if (proyecto(); as p) {
+  <div class="detalle-encabezado">
+    <div class="page-header">
+      <h2>{{ p.nombre }}</h2>
+      <p-tag [value]="p.estado" [severity]="severidadProyecto(p.estado)" />
+    </div>
+    <p class="texto-suave">
+      <i class="pi pi-user"></i>
+      {{ p.cliente?.nombre ?? 'Proyecto interno (sin cliente)' }}
+    </p>
+  </div>
+
+  <div class="page-header">
+    <h3>Tareas</h3>
+    <p-button label="Agregar tarea" icon="pi pi-plus" (onClick)="abrirNueva()" />
+  </div>
+
+  <div class="tabla-card">
+    <p-table
+      [value]="p.tareas ?? []"
+      [loading]="cargando()"
+      [rowHover]="true"
+      [tableStyle]="{ 'min-width': '26rem' }"
+    >
+      <ng-template #header>
+        <tr>
+          <th>Descripción</th>
+          <th style="width: 9rem">Estado</th>
+          <th style="width: 8rem">Acciones</th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-tarea>
+        <tr>
+          <td>{{ tarea.descripcion }}</td>
+          <td>
+            <p-tag [value]="tarea.estado" [severity]="severidadTarea(tarea.estado)" />
+          </td>
+          <td>
+            <p-button
+              icon="pi pi-pencil"
+              severity="secondary"
+              [text]="true"
+              [rounded]="true"
+              ariaLabel="Editar tarea"
+              (onClick)="abrirEdicion(tarea)"
+            />
+            <p-button
+              icon="pi pi-trash"
+              severity="danger"
+              [text]="true"
+              [rounded]="true"
+              ariaLabel="Eliminar tarea"
+              (onClick)="eliminar(tarea)"
+            />
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template #emptymessage>
+        <tr>
+          <td colspan="3">
+            <div class="estado-vacio">
+              <i class="pi pi-check-square"></i>
+              <p>El proyecto todavía no tiene tareas.</p>
+              <p-button
+                label="Agregar la primera"
+                icon="pi pi-plus"
+                [outlined]="true"
+                size="small"
+                (onClick)="abrirNueva()"
+              />
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <p-dialog
+    [header]="editando ? 'Editar tarea' : 'Agregar tarea'"
+    [visible]="dialogoVisible()"
+    (visibleChange)="dialogoVisible.set($event)"
+    [modal]="true"
+    [style]="{ width: '28rem' }"
+    [breakpoints]="{ '640px': '92vw' }"
+    [draggable]="false"
+  >
+    <div class="form-dialog">
+      <label for="t-descripcion">Descripción</label>
+      <input
+        pInputText
+        id="t-descripcion"
+        name="descripcion"
+        [(ngModel)]="formDescripcion"
+        placeholder="¿Qué hay que hacer?"
+        autofocus
+        (keyup.enter)="guardar()"
+      />
+
+      @if (editando) {
+        <label for="t-estado">Estado</label>
+        <p-select
+          inputId="t-estado"
+          name="estado"
+          [(ngModel)]="formEstado"
+          [options]="estadosTarea"
+          appendTo="body"
+        />
+      }
+    </div>
+
+    <ng-template #footer>
+      <p-button
+        label="Cancelar"
+        severity="secondary"
+        [text]="true"
+        (onClick)="dialogoVisible.set(false)"
+      />
+      <p-button
+        label="Guardar"
+        icon="pi pi-check"
+        [loading]="guardando()"
+        [disabled]="!formDescripcion.trim()"
+        (onClick)="guardar()"
+      />
+    </ng-template>
+  </p-dialog>
+} @else if (!cargando()) {
+  <div class="estado-vacio">
+    <i class="pi pi-exclamation-circle"></i>
+    <p>No se encontró el proyecto.</p>
+  </div>
+}

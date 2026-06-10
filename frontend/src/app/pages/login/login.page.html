@@ -1,0 +1,45 @@
+<div class="login-wrapper">
+  <p-card class="login-card">
+    <div class="login-titulo">
+      <i class="pi pi-briefcase"></i>
+      <h2>Gestión de Proyectos</h2>
+      <p class="texto-suave">Ingresá con tu usuario para continuar</p>
+    </div>
+
+    <form (ngSubmit)="ingresar()" class="login-form">
+      <label for="nombre">Usuario</label>
+      <input
+        pInputText
+        id="nombre"
+        name="nombre"
+        [(ngModel)]="nombre"
+        placeholder="Nombre de usuario"
+        autocomplete="username"
+        autofocus
+      />
+
+      <label for="clave">Clave</label>
+      <p-password
+        inputId="clave"
+        name="clave"
+        [(ngModel)]="clave"
+        [feedback]="false"
+        [toggleMask]="true"
+        placeholder="Clave"
+        autocomplete="current-password"
+      />
+
+      @if (error()) {
+        <p-message severity="error" [text]="error()" />
+      }
+
+      <p-button
+        type="submit"
+        label="Ingresar"
+        icon="pi pi-sign-in"
+        [loading]="cargando()"
+        styleClass="boton-ingresar"
+      />
+    </form>
+  </p-card>
+</div>

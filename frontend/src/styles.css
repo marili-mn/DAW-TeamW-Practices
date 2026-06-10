@@ -1,0 +1,118 @@
+@import "primeicons/primeicons.css";
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  background: var(--p-surface-50, #f8fafc);
+  color: var(--p-text-color, #1e293b);
+}
+
+h2,
+h3 {
+  margin: 0;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.form-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.form-dialog label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.form-dialog input,
+.form-dialog p-select {
+  width: 100%;
+}
+
+.campo-con-accion {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
+.campo-flexible {
+  flex: 1;
+  min-width: 0;
+}
+
+.tabla-card {
+  background: var(--p-surface-0, #ffffff);
+  border-radius: 0.75rem;
+  border: 1px solid var(--p-surface-200, #e2e8f0);
+  overflow-x: auto;
+}
+
+.busqueda {
+  width: 100%;
+  max-width: 22rem;
+}
+
+.fila-clickeable {
+  cursor: pointer;
+}
+
+.texto-suave {
+  color: var(--p-text-muted-color, #64748b);
+}
+
+.estado-vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 2.5rem 1rem;
+  text-align: center;
+  color: var(--p-text-muted-color, #64748b);
+}
+
+.estado-vacio i {
+  font-size: 2rem;
+}
+
+.estado-vacio p {
+  margin: 0;
+}
+
+.detalle-encabezado {
+  margin-top: 0.5rem;
+}
+
+.detalle-encabezado .texto-suave {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .page-header {
+    margin: 0.75rem 0;
+  }
+
+  .busqueda {
+    max-width: 100%;
+  }
+
+  /* botones de acción más grandes para uso táctil */
+  .p-datatable .p-button {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+  }
+}

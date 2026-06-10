@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.env
+*.log
+.angular/
+coverage/
+
+# binarios y archivos de runtime de nginx (se descargan con manage.py setup)
+deploy/nginx-*/
+deploy/logs/
+deploy/temp/
+deploy/mime.types

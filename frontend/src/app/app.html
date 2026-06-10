@@ -1,0 +1,28 @@
+<p-toast position="top-right" />
+<p-confirmdialog [style]="{ width: '24rem' }" [breakpoints]="{ '640px': '92vw' }" />
+
+@if (auth.loggedIn()) {
+  <header class="topbar">
+    <span class="brand"><i class="pi pi-briefcase"></i> Gestión de Proyectos</span>
+    <nav>
+      <a routerLink="/proyectos" routerLinkActive="activo">
+        <i class="pi pi-folder"></i><span>Proyectos</span>
+      </a>
+      <a routerLink="/clientes" routerLinkActive="activo">
+        <i class="pi pi-users"></i><span>Clientes</span>
+      </a>
+    </nav>
+    <p-button
+      label="Salir"
+      icon="pi pi-sign-out"
+      severity="secondary"
+      [outlined]="true"
+      size="small"
+      (onClick)="salir()"
+    />
+  </header>
+}
+
+<main class="contenido">
+  <router-outlet />
+</main>

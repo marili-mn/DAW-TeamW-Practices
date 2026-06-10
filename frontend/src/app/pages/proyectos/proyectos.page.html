@@ -1,0 +1,209 @@
+<div class="page-header">
+  <h2>Proyectos</h2>
+  <p-button label="Nuevo proyecto" icon="pi pi-plus" (onClick)="abrirNuevo()" />
+</div>
+
+<div class="tabla-card">
+  <p-table
+    #dt
+    [value]="proyectos()"
+    [loading]="cargando()"
+    [paginator]="proyectos().length > 10"
+    [rows]="10"
+    [rowHover]="true"
+    [globalFilterFields]="['nombre', 'estado', 'cliente.nombre']"
+    [tableStyle]="{ 'min-width': '36rem' }"
+  >
+    <ng-template #caption>
+      <p-iconfield>
+        <p-inputicon styleClass="pi pi-search" />
+        <input
+          pInputText
+          type="text"
+          placeholder="Buscar proyecto, cliente o estado..."
+          (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+          class="busqueda"
+        />
+      </p-iconfield>
+    </ng-template>
+    <ng-template #header>
+      <tr>
+        <th pSortableColumn="nombre">Nombre <p-sortIcon field="nombre" /></th>
+        <th pSortableColumn="cliente.nombre">
+          Cliente <p-sortIcon field="cliente.nombre" />
+        </th>
+        <th pSortableColumn="estado">Estado <p-sortIcon field="estado" /></th>
+        <th style="width: 9rem">Acciones</th>
+      </tr>
+    </ng-template>
+    <ng-template #body let-proyecto>
+      <tr class="fila-clickeable" (click)="verDetalle(proyecto)">
+        <td>{{ proyecto.nombre }}</td>
+        <td>
+          @if (proyecto.cliente) {
+            {{ proyecto.cliente.nombre }}
+          } @else {
+            <span class="texto-suave">Proyecto interno</span>
+          }
+        </td>
+        <td>
+          <p-tag [value]="proyecto.estado" [severity]="severidad(proyecto.estado)" />
+        </td>
+        <td>
+          <p-button
+            icon="pi pi-eye"
+            severity="secondary"
+            [text]="true"
+            [rounded]="true"
+            ariaLabel="Ver detalle"
+          />
+          <p-button
+            icon="pi pi-pencil"
+            severity="secondary"
+            [text]="true"
+            [rounded]="true"
+            ariaLabel="Editar proyecto"
+            (onClick)="abrirEdicion(proyecto, $event)"
+          />
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="4">
+          <div class="estado-vacio">
+            <i class="pi pi-folder-open"></i>
+            <p>No hay proyectos cargados.</p>
+            <p-button
+              label="Crear el primero"
+              icon="pi pi-plus"
+              [outlined]="true"
+              size="small"
+              (onClick)="abrirNuevo()"
+            />
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-dialog
+  [header]="editando ? 'Editar proyecto' : 'Nuevo proyecto'"
+  [visible]="dialogoVisible()"
+  (visibleChange)="dialogoVisible.set($event)"
+  [modal]="true"
+  [style]="{ width: '28rem' }"
+  [breakpoints]="{ '640px': '92vw' }"
+  [draggable]="false"
+>
+  <div class="form-dialog">
+    <label for="p-nombre">Nombre</label>
+    <input
+      pInputText
+      id="p-nombre"
+      name="nombre"
+      [(ngModel)]="formNombre"
+      placeholder="Nombre del proyecto"
+      autofocus
+      (keyup.enter)="guardar()"
+    />
+
+    @if (editando) {
+      <label for="p-estado">Estado</label>
+      <p-select
+        inputId="p-estado"
+        name="estado"
+        [(ngModel)]="formEstado"
+        [options]="estados"
+        appendTo="body"
+      />
+    }
+
+    <label for="p-cliente">Cliente (opcional)</label>
+    <div class="campo-con-accion">
+      <p-select
+        inputId="p-cliente"
+        name="cliente"
+        [(ngModel)]="formIdCliente"
+        [options]="clientesActivos()"
+        optionLabel="nombre"
+        optionValue="id"
+        [showClear]="true"
+        [filter]="clientesActivos().length > 5"
+        placeholder="Proyecto interno (sin cliente)"
+        appendTo="body"
+        class="campo-flexible"
+      />
+      <p-button
+        icon="pi pi-user-plus"
+        severity="secondary"
+        [outlined]="true"
+        ariaLabel="Crear cliente nuevo"
+        (onClick)="abrirNuevoCliente()"
+      />
+    </div>
+    <small class="texto-suave">
+      Solo se listan clientes en estado ACTIVO. Podés crear uno nuevo con
+      <i class="pi pi-user-plus"></i>.
+    </small>
+  </div>
+
+  <ng-template #footer>
+    <p-button
+      label="Cancelar"
+      severity="secondary"
+      [text]="true"
+      (onClick)="dialogoVisible.set(false)"
+    />
+    <p-button
+      label="Guardar"
+      icon="pi pi-check"
+      [loading]="guardando()"
+      [disabled]="!formNombre.trim()"
+      (onClick)="guardar()"
+    />
+  </ng-template>
+</p-dialog>
+
+<p-dialog
+  header="Nuevo cliente"
+  [visible]="dialogoClienteVisible()"
+  (visibleChange)="dialogoClienteVisible.set($event)"
+  [modal]="true"
+  [style]="{ width: '24rem' }"
+  [breakpoints]="{ '640px': '92vw' }"
+  [draggable]="false"
+>
+  <div class="form-dialog">
+    <label for="nc-nombre">Nombre</label>
+    <input
+      pInputText
+      id="nc-nombre"
+      name="nuevoCliente"
+      [(ngModel)]="nuevoClienteNombre"
+      placeholder="Nombre del cliente"
+      autofocus
+      (keyup.enter)="crearCliente()"
+    />
+    <small class="texto-suave">
+      Se crea en estado ACTIVO y queda seleccionado en el proyecto.
+    </small>
+  </div>
+
+  <ng-template #footer>
+    <p-button
+      label="Cancelar"
+      severity="secondary"
+      [text]="true"
+      (onClick)="dialogoClienteVisible.set(false)"
+    />
+    <p-button
+      label="Crear"
+      icon="pi pi-check"
+      [loading]="guardandoCliente()"
+      [disabled]="!nuevoClienteNombre.trim()"
+      (onClick)="crearCliente()"
+    />
+  </ng-template>
+</p-dialog>

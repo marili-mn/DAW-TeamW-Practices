@@ -1,0 +1,133 @@
+<div class="page-header">
+  <h2>Clientes</h2>
+  <p-button label="Nuevo cliente" icon="pi pi-plus" (onClick)="abrirNuevo()" />
+</div>
+
+<div class="tabla-card">
+  <p-table
+    #dt
+    [value]="clientes()"
+    [loading]="cargando()"
+    [paginator]="clientes().length > 10"
+    [rows]="10"
+    [rowHover]="true"
+    [globalFilterFields]="['nombre', 'estado']"
+    [tableStyle]="{ 'min-width': '28rem' }"
+  >
+    <ng-template #caption>
+      <p-iconfield>
+        <p-inputicon styleClass="pi pi-search" />
+        <input
+          pInputText
+          type="text"
+          placeholder="Buscar cliente..."
+          (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+          class="busqueda"
+        />
+      </p-iconfield>
+    </ng-template>
+    <ng-template #header>
+      <tr>
+        <th pSortableColumn="nombre">Nombre <p-sortIcon field="nombre" /></th>
+        <th pSortableColumn="estado">Estado <p-sortIcon field="estado" /></th>
+        <th style="width: 13rem">Acciones</th>
+      </tr>
+    </ng-template>
+    <ng-template #body let-cliente>
+      <tr>
+        <td>{{ cliente.nombre }}</td>
+        <td>
+          <p-tag
+            [value]="cliente.estado"
+            [severity]="cliente.estado === 'ACTIVO' ? 'success' : 'danger'"
+          />
+        </td>
+        <td>
+          <p-button
+            icon="pi pi-pencil"
+            severity="secondary"
+            [text]="true"
+            [rounded]="true"
+            ariaLabel="Editar cliente"
+            (onClick)="abrirEdicion(cliente)"
+          />
+          @if (cliente.estado === 'ACTIVO') {
+            <p-button
+              label="Dar de baja"
+              icon="pi pi-user-minus"
+              severity="danger"
+              [text]="true"
+              size="small"
+              (onClick)="darDeBaja(cliente)"
+            />
+          } @else {
+            <p-button
+              label="Reactivar"
+              icon="pi pi-user-plus"
+              severity="success"
+              [text]="true"
+              size="small"
+              (onClick)="reactivar(cliente)"
+            />
+          }
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="3">
+          <div class="estado-vacio">
+            <i class="pi pi-users"></i>
+            <p>No hay clientes cargados.</p>
+            <p-button
+              label="Crear el primero"
+              icon="pi pi-plus"
+              [outlined]="true"
+              size="small"
+              (onClick)="abrirNuevo()"
+            />
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-dialog
+  [header]="editando ? 'Editar cliente' : 'Nuevo cliente'"
+  [visible]="dialogoVisible()"
+  (visibleChange)="dialogoVisible.set($event)"
+  [modal]="true"
+  [style]="{ width: '26rem' }"
+  [breakpoints]="{ '640px': '92vw' }"
+  [draggable]="false"
+>
+  <div class="form-dialog">
+    <label for="c-nombre">Nombre</label>
+    <input
+      pInputText
+      id="c-nombre"
+      name="nombre"
+      [(ngModel)]="formNombre"
+      placeholder="Nombre del cliente"
+      autofocus
+      (keyup.enter)="guardar()"
+    />
+  </div>
+
+  <ng-template #footer>
+    <p-button
+      label="Cancelar"
+      severity="secondary"
+      [text]="true"
+      (onClick)="dialogoVisible.set(false)"
+    />
+    <p-button
+      label="Guardar"
+      icon="pi pi-check"
+      [loading]="guardando()"
+      [disabled]="!formNombre.trim()"
+      (onClick)="guardar()"
+    />
+  </ng-template>
+</p-dialog>
