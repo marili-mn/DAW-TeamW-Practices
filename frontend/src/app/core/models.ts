@@ -1,6 +1,7 @@
 export type EstadoCliente = 'ACTIVO' | 'BAJA';
 export type EstadoProyecto = 'ACTIVO' | 'FINALIZADO' | 'BAJA';
 export type EstadoTarea = 'PENDIENTE' | 'FINALIZADA' | 'BAJA';
+export type EstadoUsuario = 'ACTIVO' | 'BAJA';
 
 export interface Cliente {
   id: number;
@@ -31,4 +32,10 @@ export interface Historial {
   accion: string;
   usuario: string;
   fecha: string;
+}
+
+export interface Usuario {
+  id: number;
+  nombre: string;
+  estado: EstadoUsuario;
 }

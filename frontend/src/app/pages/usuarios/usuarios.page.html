@@ -1,0 +1,142 @@
+<div class="page-header">
+  <h2>Usuarios</h2>
+  <p-button label="Nuevo usuario" icon="pi pi-plus" (onClick)="abrirNuevo()" />
+</div>
+
+<div class="tabla-card">
+  <p-table
+    #dt
+    [value]="usuarios()"
+    [loading]="cargando()"
+    [paginator]="usuarios().length > 10"
+    [rows]="10"
+    [rowHover]="true"
+    [globalFilterFields]="['nombre', 'estado']"
+    [tableStyle]="{ 'min-width': '28rem' }"
+  >
+    <ng-template #caption>
+      <p-iconfield>
+        <p-inputicon styleClass="pi pi-search" />
+        <input
+          pInputText
+          type="text"
+          placeholder="Buscar usuario..."
+          (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+          class="busqueda"
+        />
+      </p-iconfield>
+    </ng-template>
+    <ng-template #header>
+      <tr>
+        <th pSortableColumn="nombre">Nombre <p-sortIcon field="nombre" /></th>
+        <th pSortableColumn="estado">Estado <p-sortIcon field="estado" /></th>
+        <th style="width: 13rem">Acciones</th>
+      </tr>
+    </ng-template>
+    <ng-template #body let-usuario>
+      <tr>
+        <td>{{ usuario.nombre }}</td>
+        <td>
+          <p-tag
+            [value]="usuario.estado"
+            [severity]="usuario.estado === 'ACTIVO' ? 'success' : 'danger'"
+          />
+        </td>
+        <td>
+          <p-button
+            icon="pi pi-pencil"
+            severity="secondary"
+            [text]="true"
+            [rounded]="true"
+            ariaLabel="Editar usuario"
+            (onClick)="abrirEdicion(usuario)"
+          />
+          @if (usuario.estado === 'ACTIVO') {
+            <p-button
+              label="Dar de baja"
+              icon="pi pi-user-minus"
+              severity="danger"
+              [text]="true"
+              size="small"
+              (onClick)="darDeBaja(usuario)"
+            />
+          } @else {
+            <p-button
+              label="Reactivar"
+              icon="pi pi-user-plus"
+              severity="success"
+              [text]="true"
+              size="small"
+              (onClick)="reactivar(usuario)"
+            />
+          }
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="3">
+          <div class="estado-vacio">
+            <i class="pi pi-users"></i>
+            <p>No hay usuarios cargados.</p>
+            <p-button
+              label="Crear el primero"
+              icon="pi pi-plus"
+              [outlined]="true"
+              size="small"
+              (onClick)="abrirNuevo()"
+            />
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-dialog
+  [header]="editando ? 'Editar usuario' : 'Nuevo usuario'"
+  [visible]="dialogoVisible()"
+  (visibleChange)="dialogoVisible.set($event)"
+  [modal]="true"
+  [style]="{ width: '26rem' }"
+  [breakpoints]="{ '640px': '92vw' }"
+  [draggable]="false"
+>
+  <div class="form-dialog">
+    <label for="u-nombre">Nombre</label>
+    <input
+      pInputText
+      id="u-nombre"
+      name="nombre"
+      [(ngModel)]="formNombre"
+      placeholder="Nombre de usuario"
+      autofocus
+    />
+    <label for="u-clave">{{ editando ? 'Nueva clave (opcional)' : 'Clave' }}</label>
+    <input
+      pInputText
+      id="u-clave"
+      name="clave"
+      type="password"
+      [(ngModel)]="formClave"
+      placeholder="Mínimo 6 caracteres"
+      (keyup.enter)="guardar()"
+    />
+  </div>
+
+  <ng-template #footer>
+    <p-button
+      label="Cancelar"
+      severity="secondary"
+      [text]="true"
+      (onClick)="dialogoVisible.set(false)"
+    />
+    <p-button
+      label="Guardar"
+      icon="pi pi-check"
+      [loading]="guardando()"
+      [disabled]="!formNombre.trim() || (!editando && !formClave.trim())"
+      (onClick)="guardar()"
+    />
+  </ng-template>
+</p-dialog>

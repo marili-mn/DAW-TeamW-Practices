@@ -8,6 +8,7 @@ import {
   Historial,
   Proyecto,
   Tarea,
+  Usuario,
 } from './models';
 
 @Injectable({ providedIn: 'root' })
@@ -79,5 +80,21 @@ export class ApiService {
   // Historial de cambios
   getHistorial() {
     return this.http.get<Historial[]>(`${API_URL}/historial`);
+  }
+
+  // Usuarios
+  getUsuarios() {
+    return this.http.get<Usuario[]>(`${API_URL}/usuarios`);
+  }
+
+  createUsuario(nombre: string, clave: string) {
+    return this.http.post<Usuario>(`${API_URL}/usuarios`, { nombre, clave });
+  }
+
+  updateUsuario(
+    id: number,
+    cambios: Partial<Pick<Usuario, 'nombre' | 'estado'>> & { clave?: string },
+  ) {
+    return this.http.patch<Usuario>(`${API_URL}/usuarios/${id}`, cambios);
   }
 }
