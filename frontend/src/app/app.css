@@ -46,10 +46,41 @@
   color: var(--p-primary-600, #2563eb);
 }
 
+.usuario-actual {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  color: var(--p-text-muted-color, #64748b);
+}
+
+.rol-chip {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: var(--p-surface-200, #e2e8f0);
+  color: var(--p-text-color, #334155);
+}
+
+.rol-chip.rol-admin {
+  background: var(--p-primary-100, #dbeafe);
+  color: var(--p-primary-700, #1d4ed8);
+}
+
 .contenido {
   padding: 1.5rem;
   max-width: 1100px;
   margin: 0 auto;
+}
+
+@media (max-width: 640px) {
+  .usuario-actual span:not(.rol-chip),
+  .usuario-actual {
+    font-size: 0.8rem;
+  }
 }
 
 @media (max-width: 640px) {

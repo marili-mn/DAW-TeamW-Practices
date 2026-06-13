@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { ClientesModule } from './clientes/clientes.module';
+import { HistorialModule } from './historial/historial.module';
 import { ProyectosModule } from './proyectos/proyectos.module';
 import { TareasModule } from './tareas/tareas.module';
 
@@ -26,6 +27,7 @@ import { TareasModule } from './tareas/tareas.module';
     ClientesModule,
     ProyectosModule,
     TareasModule,
+    HistorialModule,
   ],
 })
 export class AppModule {}

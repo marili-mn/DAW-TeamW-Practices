@@ -6,6 +6,8 @@ export interface Cliente {
   id: number;
   nombre: string;
   estado: EstadoCliente;
+  telefono?: string | null;
+  email?: string | null;
 }
 
 export interface Tarea {
@@ -20,4 +22,13 @@ export interface Proyecto {
   estado: EstadoProyecto;
   cliente: Cliente | null;
   tareas?: Tarea[];
+}
+
+export interface Historial {
+  id: number;
+  entidad: string;
+  entidadId: number | null;
+  accion: string;
+  usuario: string;
+  fecha: string;
 }

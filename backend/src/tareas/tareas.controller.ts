@@ -10,13 +10,16 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Roles } from '../auth/roles.decorator';
+import { RolesGuard } from '../auth/roles.guard';
+import { Rol } from '../usuarios/usuario.entity';
 import { CreateTareaDto } from './dto/create-tarea.dto';
 import { UpdateTareaDto } from './dto/update-tarea.dto';
 import { TareasService } from './tareas.service';
 
 @ApiTags('tareas')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('tareas')
 export class TareasController {
   constructor(private readonly tareasService: TareasService) {}
@@ -35,6 +38,7 @@ export class TareasController {
   }
 
   @Delete(':id')
+  @Roles(Rol.ADMIN)
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.tareasService.remove(id);
   }

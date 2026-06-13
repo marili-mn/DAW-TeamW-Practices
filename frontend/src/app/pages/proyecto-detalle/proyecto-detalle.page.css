@@ -1,0 +1,101 @@
+.acciones-tareas {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+/* Tablero: 3 columnas en escritorio, 1 en mobile */
+.tablero {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.columna {
+  background: var(--p-surface-100, #f1f5f9);
+  border: 1px solid var(--p-surface-200, #e2e8f0);
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  min-height: 8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  transition: outline 0.15s ease;
+}
+
+/* Mientras se arrastra una tarjeta, se resaltan las zonas donde soltar */
+.columna--activa {
+  outline: 2px dashed var(--p-primary-color, #3b82f6);
+  outline-offset: 2px;
+}
+
+.columna-titulo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.columna-titulo .contador {
+  background: var(--p-surface-0, #ffffff);
+  border: 1px solid var(--p-surface-200, #e2e8f0);
+  border-radius: 999px;
+  padding: 0 0.55rem;
+  font-size: 0.8rem;
+}
+
+.tarjeta {
+  background: var(--p-surface-0, #ffffff);
+  border: 1px solid var(--p-surface-200, #e2e8f0);
+  border-left: 4px solid var(--p-surface-300, #cbd5e1);
+  border-radius: 0.6rem;
+  padding: 0.6rem 0.7rem;
+  cursor: grab;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.tarjeta:active {
+  cursor: grabbing;
+}
+
+/* Color del borde izquierdo según el estado de la tarea */
+.tarjeta[data-estado="PENDIENTE"] {
+  border-left-color: #f59e0b;
+}
+.tarjeta[data-estado="FINALIZADA"] {
+  border-left-color: #22c55e;
+}
+.tarjeta[data-estado="BAJA"] {
+  border-left-color: #ef4444;
+}
+
+.tarjeta-desc {
+  margin: 0;
+  font-size: 0.9rem;
+  word-break: break-word;
+}
+
+.tarjeta-acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.15rem;
+}
+
+.columna-vacia {
+  color: var(--p-text-muted-color, #94a3b8);
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 0.75rem 0;
+  margin: 0;
+}
+
+@media (max-width: 720px) {
+  .tablero {
+    grid-template-columns: 1fr;
+  }
+}

@@ -38,6 +38,8 @@ export class ClientesService {
     const cliente = this.clientesRepository.create({
       nombre: createClienteDto.nombre,
       estado: EstadoCliente.ACTIVO,
+      telefono: createClienteDto.telefono ?? null,
+      email: createClienteDto.email ?? null,
     });
     return this.clientesRepository.save(cliente);
   }

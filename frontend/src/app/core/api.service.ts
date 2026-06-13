@@ -5,6 +5,7 @@ import {
   Cliente,
   EstadoProyecto,
   EstadoTarea,
+  Historial,
   Proyecto,
   Tarea,
 } from './models';
@@ -20,11 +21,18 @@ export class ApiService {
     });
   }
 
-  createCliente(nombre: string) {
-    return this.http.post<Cliente>(`${API_URL}/clientes`, { nombre });
+  createCliente(datos: {
+    nombre: string;
+    telefono?: string | null;
+    email?: string | null;
+  }) {
+    return this.http.post<Cliente>(`${API_URL}/clientes`, datos);
   }
 
-  updateCliente(id: number, cambios: Partial<Pick<Cliente, 'nombre' | 'estado'>>) {
+  updateCliente(
+    id: number,
+    cambios: Partial<Pick<Cliente, 'nombre' | 'estado' | 'telefono' | 'email'>>,
+  ) {
     return this.http.patch<Cliente>(`${API_URL}/clientes/${id}`, cambios);
   }
 
@@ -66,5 +74,10 @@ export class ApiService {
 
   deleteTarea(id: number) {
     return this.http.delete<Tarea>(`${API_URL}/tareas/${id}`);
+  }
+
+  // Historial de cambios
+  getHistorial() {
+    return this.http.get<Historial[]>(`${API_URL}/historial`);
   }
 }

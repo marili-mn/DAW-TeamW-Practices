@@ -20,68 +20,140 @@
 
   <div class="page-header">
     <h3>Tareas</h3>
-    <p-button label="Agregar tarea" icon="pi pi-plus" (onClick)="abrirNueva()" />
+    <div class="acciones-tareas">
+      <p-button
+        icon="pi pi-th-large"
+        [text]="vista() !== 'tablero'"
+        [outlined]="vista() === 'tablero'"
+        ariaLabel="Vista tablero"
+        (onClick)="vista.set('tablero')"
+      />
+      <p-button
+        icon="pi pi-list"
+        [text]="vista() !== 'tabla'"
+        [outlined]="vista() === 'tabla'"
+        ariaLabel="Vista tabla"
+        (onClick)="vista.set('tabla')"
+      />
+      <p-button label="Agregar tarea" icon="pi pi-plus" (onClick)="abrirNueva()" />
+    </div>
   </div>
 
-  <div class="tabla-card">
-    <p-table
-      [value]="p.tareas ?? []"
-      [loading]="cargando()"
-      [rowHover]="true"
-      [tableStyle]="{ 'min-width': '26rem' }"
-    >
-      <ng-template #header>
-        <tr>
-          <th>Descripción</th>
-          <th style="width: 9rem">Estado</th>
-          <th style="width: 8rem">Acciones</th>
-        </tr>
-      </ng-template>
-      <ng-template #body let-tarea>
-        <tr>
-          <td>{{ tarea.descripcion }}</td>
-          <td>
-            <p-tag [value]="tarea.estado" [severity]="severidadTarea(tarea.estado)" />
-          </td>
-          <td>
-            <p-button
-              icon="pi pi-pencil"
-              severity="secondary"
-              [text]="true"
-              [rounded]="true"
-              ariaLabel="Editar tarea"
-              (onClick)="abrirEdicion(tarea)"
-            />
-            <p-button
-              icon="pi pi-trash"
-              severity="danger"
-              [text]="true"
-              [rounded]="true"
-              ariaLabel="Eliminar tarea"
-              (onClick)="eliminar(tarea)"
-            />
-          </td>
-        </tr>
-      </ng-template>
-      <ng-template #emptymessage>
-        <tr>
-          <td colspan="3">
-            <div class="estado-vacio">
-              <i class="pi pi-check-square"></i>
-              <p>El proyecto todavía no tiene tareas.</p>
+  @if (vista() === 'tabla') {
+    <div class="tabla-card">
+      <p-table
+        [value]="p.tareas ?? []"
+        [loading]="cargando()"
+        [rowHover]="true"
+        [tableStyle]="{ 'min-width': '26rem' }"
+      >
+        <ng-template #header>
+          <tr>
+            <th>Descripción</th>
+            <th style="width: 9rem">Estado</th>
+            <th style="width: 8rem">Acciones</th>
+          </tr>
+        </ng-template>
+        <ng-template #body let-tarea>
+          <tr>
+            <td>{{ tarea.descripcion }}</td>
+            <td>
+              <p-tag [value]="tarea.estado" [severity]="severidadTarea(tarea.estado)" />
+            </td>
+            <td>
               <p-button
-                label="Agregar la primera"
-                icon="pi pi-plus"
-                [outlined]="true"
-                size="small"
-                (onClick)="abrirNueva()"
+                icon="pi pi-pencil"
+                severity="secondary"
+                [text]="true"
+                [rounded]="true"
+                ariaLabel="Editar tarea"
+                (onClick)="abrirEdicion(tarea)"
               />
+              @if (auth.esAdmin()) {
+                <p-button
+                  icon="pi pi-trash"
+                  severity="danger"
+                  [text]="true"
+                  [rounded]="true"
+                  ariaLabel="Eliminar tarea"
+                  (onClick)="eliminar(tarea)"
+                />
+              }
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template #emptymessage>
+          <tr>
+            <td colspan="3">
+              <div class="estado-vacio">
+                <i class="pi pi-check-square"></i>
+                <p>El proyecto todavía no tiene tareas.</p>
+                <p-button
+                  label="Agregar la primera"
+                  icon="pi pi-plus"
+                  [outlined]="true"
+                  size="small"
+                  (onClick)="abrirNueva()"
+                />
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  } @else {
+    <!-- Tablero kanban: una columna por estado. Las tarjetas se pueden
+         arrastrar de una columna a otra para cambiar el estado. -->
+    <div class="tablero">
+      @for (col of columnas(); track col.estado) {
+        <div
+          class="columna"
+          [class.columna--activa]="tareaArrastrada"
+          (dragover)="permitirDrop($event)"
+          (drop)="soltarEn(col.estado)"
+        >
+          <div class="columna-titulo">
+            <span><i [class]="col.icono"></i> {{ col.titulo }}</span>
+            <span class="contador">{{ col.tareas.length }}</span>
+          </div>
+
+          @for (tarea of col.tareas; track tarea.id) {
+            <div
+              class="tarjeta"
+              [attr.data-estado]="tarea.estado"
+              draggable="true"
+              (dragstart)="empezarArrastre(tarea)"
+              (dragend)="tareaArrastrada = null"
+            >
+              <p class="tarjeta-desc">{{ tarea.descripcion }}</p>
+              <div class="tarjeta-acciones">
+                <p-button
+                  icon="pi pi-pencil"
+                  severity="secondary"
+                  [text]="true"
+                  [rounded]="true"
+                  ariaLabel="Editar tarea"
+                  (onClick)="abrirEdicion(tarea)"
+                />
+                @if (auth.esAdmin()) {
+                  <p-button
+                    icon="pi pi-trash"
+                    severity="danger"
+                    [text]="true"
+                    [rounded]="true"
+                    ariaLabel="Eliminar tarea"
+                    (onClick)="eliminar(tarea)"
+                  />
+                }
+              </div>
             </div>
-          </td>
-        </tr>
-      </ng-template>
-    </p-table>
-  </div>
+          } @empty {
+            <p class="columna-vacia">Sin tareas</p>
+          }
+        </div>
+      }
+    </div>
+  }
 
   <p-dialog
     [header]="editando ? 'Editar tarea' : 'Agregar tarea'"

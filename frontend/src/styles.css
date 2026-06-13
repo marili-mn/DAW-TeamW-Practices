@@ -72,6 +72,18 @@ h3 {
   color: var(--p-text-muted-color, #64748b);
 }
 
+.contacto {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.85rem;
+}
+
+.contacto i {
+  margin-right: 0.35rem;
+  color: var(--p-text-muted-color, #64748b);
+}
+
 .estado-vacio {
   display: flex;
   flex-direction: column;

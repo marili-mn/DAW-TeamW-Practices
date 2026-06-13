@@ -11,7 +11,7 @@
     [paginator]="clientes().length > 10"
     [rows]="10"
     [rowHover]="true"
-    [globalFilterFields]="['nombre', 'estado']"
+    [globalFilterFields]="['nombre', 'estado', 'telefono', 'email']"
     [tableStyle]="{ 'min-width': '28rem' }"
   >
     <ng-template #caption>
@@ -29,6 +29,7 @@
     <ng-template #header>
       <tr>
         <th pSortableColumn="nombre">Nombre <p-sortIcon field="nombre" /></th>
+        <th>Contacto</th>
         <th pSortableColumn="estado">Estado <p-sortIcon field="estado" /></th>
         <th style="width: 13rem">Acciones</th>
       </tr>
@@ -36,6 +37,20 @@
     <ng-template #body let-cliente>
       <tr>
         <td>{{ cliente.nombre }}</td>
+        <td>
+          @if (cliente.telefono || cliente.email) {
+            <div class="contacto">
+              @if (cliente.telefono) {
+                <span><i class="pi pi-phone"></i> {{ cliente.telefono }}</span>
+              }
+              @if (cliente.email) {
+                <span><i class="pi pi-envelope"></i> {{ cliente.email }}</span>
+              }
+            </div>
+          } @else {
+            <span class="texto-suave">—</span>
+          }
+        </td>
         <td>
           <p-tag
             [value]="cliente.estado"
@@ -75,7 +90,7 @@
     </ng-template>
     <ng-template #emptymessage>
       <tr>
-        <td colspan="3">
+        <td colspan="4">
           <div class="estado-vacio">
             <i class="pi pi-users"></i>
             <p>No hay clientes cargados.</p>
@@ -111,6 +126,26 @@
       [(ngModel)]="formNombre"
       placeholder="Nombre del cliente"
       autofocus
+    />
+
+    <label for="c-telefono">Teléfono</label>
+    <input
+      pInputText
+      id="c-telefono"
+      name="telefono"
+      type="tel"
+      [(ngModel)]="formTelefono"
+      placeholder="Opcional"
+    />
+
+    <label for="c-email">Email</label>
+    <input
+      pInputText
+      id="c-email"
+      name="email"
+      type="email"
+      [(ngModel)]="formEmail"
+      placeholder="Opcional"
       (keyup.enter)="guardar()"
     />
   </div>

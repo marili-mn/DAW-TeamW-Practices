@@ -15,4 +15,10 @@ export class Cliente {
 
   @Column({ type: 'enum', enum: EstadoCliente, enumName: 'estados_clientes' })
   estado: EstadoCliente;
+
+  @Column({ type: 'text', nullable: true })
+  telefono: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  email: string | null;
 }

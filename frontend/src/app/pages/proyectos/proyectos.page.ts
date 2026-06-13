@@ -104,7 +104,7 @@ export class ProyectosPage {
       return;
     }
     this.guardandoCliente.set(true);
-    this.api.createCliente(nombre).subscribe({
+    this.api.createCliente({ nombre }).subscribe({
       next: (cliente) => {
         this.guardandoCliente.set(false);
         this.dialogoClienteVisible.set(false);

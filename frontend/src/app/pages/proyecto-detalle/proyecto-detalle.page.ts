@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -9,6 +9,7 @@ import { SelectModule } from 'primeng/select';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { ApiService } from '../../core/api.service';
+import { AuthService } from '../../core/auth.service';
 import { EstadoTarea, Proyecto, Tarea } from '../../core/models';
 
 @Component({
@@ -24,12 +25,14 @@ import { EstadoTarea, Proyecto, Tarea } from '../../core/models';
     TagModule,
   ],
   templateUrl: './proyecto-detalle.page.html',
+  styleUrl: './proyecto-detalle.page.css',
 })
 export class ProyectoDetallePage {
   private readonly api = inject(ApiService);
   private readonly route = inject(ActivatedRoute);
   private readonly messages = inject(MessageService);
   private readonly confirmaciones = inject(ConfirmationService);
+  protected readonly auth = inject(AuthService);
 
   readonly proyecto = signal<Proyecto | null>(null);
   readonly cargando = signal(true);
@@ -37,6 +40,33 @@ export class ProyectoDetallePage {
   readonly guardando = signal(false);
 
   readonly estadosTarea: EstadoTarea[] = ['PENDIENTE', 'FINALIZADA', 'BAJA'];
+
+  // Vista activa: tabla clásica o tablero kanban.
+  readonly vista = signal<'tabla' | 'tablero'>('tablero');
+
+  // Definición de las columnas del tablero (una por estado).
+  private readonly definicionColumnas: {
+    estado: EstadoTarea;
+    titulo: string;
+    icono: string;
+  }[] = [
+    { estado: 'PENDIENTE', titulo: 'Pendientes', icono: 'pi pi-clock' },
+    { estado: 'FINALIZADA', titulo: 'Finalizadas', icono: 'pi pi-check-circle' },
+    { estado: 'BAJA', titulo: 'Dadas de baja', icono: 'pi pi-ban' },
+  ];
+
+  // Señal derivada: agrupa las tareas del proyecto por estado.
+  // Se recalcula sola cada vez que cambia proyecto().
+  readonly columnas = computed(() => {
+    const tareas = this.proyecto()?.tareas ?? [];
+    return this.definicionColumnas.map((col) => ({
+      ...col,
+      tareas: tareas.filter((t) => t.estado === col.estado),
+    }));
+  });
+
+  // Tarea que se está arrastrando en el tablero.
+  tareaArrastrada: Tarea | null = null;
 
   private idProyecto = 0;
   editando: Tarea | null = null;
@@ -156,6 +186,45 @@ export class ProyectoDetallePage {
             }),
         });
       },
+    });
+  }
+
+  // --- Drag & drop del tablero kanban ---
+
+  // Al empezar a arrastrar, recordamos qué tarea es.
+  empezarArrastre(tarea: Tarea): void {
+    this.tareaArrastrada = tarea;
+  }
+
+  // Por defecto el navegador no permite soltar; preventDefault lo habilita.
+  permitirDrop(evento: DragEvent): void {
+    evento.preventDefault();
+  }
+
+  // Al soltar sobre una columna, cambiamos el estado de la tarea (si cambió).
+  soltarEn(estado: EstadoTarea): void {
+    const tarea = this.tareaArrastrada;
+    this.tareaArrastrada = null;
+    if (!tarea || tarea.estado === estado) {
+      return;
+    }
+    this.api.updateTarea(tarea.id, { estado }).subscribe({
+      next: () => {
+        this.cargar();
+        this.messages.add({
+          severity: 'success',
+          summary: 'Tarea movida',
+          detail: `"${tarea.descripcion}" → ${estado}`,
+          life: 2000,
+        });
+      },
+      error: (err) =>
+        this.messages.add({
+          severity: 'error',
+          summary: 'No se pudo mover la tarea',
+          detail: err.error?.message ?? 'Error inesperado',
+          life: 4000,
+        }),
     });
   }
 

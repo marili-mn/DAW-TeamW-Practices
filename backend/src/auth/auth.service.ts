@@ -14,7 +14,9 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async login(loginDto: LoginDto): Promise<{ access_token: string }> {
+  async login(
+    loginDto: LoginDto,
+  ): Promise<{ access_token: string; nombre: string; rol: string }> {
     const usuario = await this.usuariosRepository.findOneBy({
       nombre: loginDto.nombre,
     });
@@ -26,7 +28,11 @@ export class AuthService {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
-    const payload = { sub: usuario.id, nombre: usuario.nombre };
-    return { access_token: await this.jwtService.signAsync(payload) };
+    const payload = { sub: usuario.id, nombre: usuario.nombre, rol: usuario.rol };
+    return {
+      access_token: await this.jwtService.signAsync(payload),
+      nombre: usuario.nombre,
+      rol: usuario.rol,
+    };
   }
 }

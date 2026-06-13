@@ -37,6 +37,8 @@ export class ClientesPage {
 
   editando: Cliente | null = null;
   formNombre = '';
+  formTelefono = '';
+  formEmail = '';
 
   ngOnInit(): void {
     this.cargar();
@@ -56,12 +58,16 @@ export class ClientesPage {
   abrirNuevo(): void {
     this.editando = null;
     this.formNombre = '';
+    this.formTelefono = '';
+    this.formEmail = '';
     this.dialogoVisible.set(true);
   }
 
   abrirEdicion(cliente: Cliente): void {
     this.editando = cliente;
     this.formNombre = cliente.nombre;
+    this.formTelefono = cliente.telefono ?? '';
+    this.formEmail = cliente.email ?? '';
     this.dialogoVisible.set(true);
   }
 
@@ -78,10 +84,13 @@ export class ClientesPage {
     }
     this.guardando.set(true);
 
+    const telefono = this.formTelefono.trim() || null;
+    const email = this.formEmail.trim() || null;
+
     const esEdicion = !!this.editando;
     const peticion = this.editando
-      ? this.api.updateCliente(this.editando.id, { nombre })
-      : this.api.createCliente(nombre);
+      ? this.api.updateCliente(this.editando.id, { nombre, telefono, email })
+      : this.api.createCliente({ nombre, telefono, email });
 
     peticion.subscribe({
       next: () => {
