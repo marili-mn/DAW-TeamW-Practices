@@ -14,26 +14,42 @@
 
 <div class="tabla-card">
   <p-table
-    #dt
     [value]="proyectos()"
     [loading]="cargando()"
-    [paginator]="proyectos().length > 10"
-    [rows]="10"
+    [lazy]="true"
+    [paginator]="true"
+    [rows]="pageSize"
+    [totalRecords]="total()"
+    (onLazyLoad)="cargarLazy($event)"
     [rowHover]="true"
-    [globalFilterFields]="['nombre', 'estado', 'cliente.nombre']"
     [tableStyle]="{ 'min-width': '36rem' }"
+    currentPageReportTemplate="{first}–{last} de {totalRecords}"
+    [showCurrentPageReport]="true"
   >
     <ng-template #caption>
-      <p-iconfield>
-        <p-inputicon styleClass="pi pi-search" />
-        <input
-          pInputText
-          type="text"
-          placeholder="Buscar proyecto, cliente o estado..."
-          (input)="dt.filterGlobal($any($event.target).value, 'contains')"
-          class="busqueda"
+      <div class="filtros-busqueda">
+        <p-iconfield>
+          <p-inputicon styleClass="pi pi-search" />
+          <input
+            pInputText
+            type="text"
+            placeholder="Buscar por nombre..."
+            [(ngModel)]="filtroNombre"
+            (input)="recargar()"
+            class="busqueda"
+          />
+        </p-iconfield>
+        <p-select
+          [(ngModel)]="filtroEstado"
+          [options]="estadosFiltro"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Estado"
+          [showClear]="false"
+          (ngModelChange)="recargar()"
+          appendTo="body"
         />
-      </p-iconfield>
+      </div>
     </ng-template>
     <ng-template #header>
       <tr>

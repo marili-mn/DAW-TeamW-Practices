@@ -8,7 +8,7 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
-import { TableModule } from 'primeng/table';
+import { TableLazyLoadEvent, TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { ApiService } from '../../core/api.service';
 import { descargarBlob } from '../../core/download.util';
@@ -35,6 +35,7 @@ export class ProyectosPage {
   private readonly router = inject(Router);
 
   readonly proyectos = signal<Proyecto[]>([]);
+  readonly total = signal(0);
   readonly clientesActivos = signal<Cliente[]>([]);
   readonly dialogoVisible = signal(false);
   readonly guardando = signal(false);
@@ -44,6 +45,18 @@ export class ProyectosPage {
   nuevoClienteNombre = '';
 
   readonly estados: EstadoProyecto[] = ['ACTIVO', 'FINALIZADO', 'BAJA'];
+  readonly estadosFiltro: { label: string; value: EstadoProyecto | null }[] = [
+    { label: 'Todos', value: null },
+    { label: 'ACTIVO', value: 'ACTIVO' },
+    { label: 'FINALIZADO', value: 'FINALIZADO' },
+    { label: 'BAJA', value: 'BAJA' },
+  ];
+
+  // Filtros server-side (se mandan como query params al back en cada lazy load).
+  readonly pageSize = 10;
+  filtroNombre = '';
+  filtroEstado: EstadoProyecto | null = null;
+  private ultimoEvento: TableLazyLoadEvent = { first: 0, rows: this.pageSize };
 
   editando: Proyecto | null = null;
   formNombre = '';
@@ -51,19 +64,48 @@ export class ProyectosPage {
   formIdCliente: number | null = null;
   formFechaFin: string | null = null;
 
-  ngOnInit(): void {
-    this.cargar();
+  // ngOnInit no carga: la p-table con lazy=true dispara cargarLazy al iniciar.
+
+  cargarLazy(event: TableLazyLoadEvent): void {
+    this.ultimoEvento = event;
+    this.cargando.set(true);
+
+    // PrimeNG manda first (offset en filas) y rows (page size).
+    const rows = event.rows ?? this.pageSize;
+    const page = Math.floor((event.first ?? 0) / rows) + 1;
+
+    // sortField puede venir como string en lazy. Mapeamos a las columnas del back.
+    const sortMap: Record<string, 'nombre' | 'estado' | 'fecha_fin' | 'id'> = {
+      nombre: 'nombre',
+      estado: 'estado',
+      fechaFin: 'fecha_fin',
+      'cliente.nombre': 'nombre',
+    };
+    const sort = sortMap[(event.sortField as string) ?? 'nombre'] ?? 'nombre';
+    const dir: 'ASC' | 'DESC' = event.sortOrder === -1 ? 'DESC' : 'ASC';
+
+    this.api
+      .getProyectos({
+        nombre: this.filtroNombre || undefined,
+        estado: this.filtroEstado ?? undefined,
+        sort,
+        dir,
+        page,
+        pageSize: rows,
+      })
+      .subscribe({
+        next: (res) => {
+          this.proyectos.set(res.data);
+          this.total.set(res.total);
+          this.cargando.set(false);
+        },
+        error: () => this.cargando.set(false),
+      });
   }
 
-  cargar(): void {
-    this.cargando.set(true);
-    this.api.getProyectos().subscribe({
-      next: (p) => {
-        this.proyectos.set(p);
-        this.cargando.set(false);
-      },
-      error: () => this.cargando.set(false),
-    });
+  // Re-disparar la carga con los filtros actuales, volviendo a la primera página.
+  recargar(): void {
+    this.cargarLazy({ ...this.ultimoEvento, first: 0 });
   }
 
   verDetalle(proyecto: Proyecto): void {
@@ -166,7 +208,7 @@ export class ProyectosPage {
       next: () => {
         this.guardando.set(false);
         this.dialogoVisible.set(false);
-        this.cargar();
+        this.recargar();
         this.messages.add({
           severity: 'success',
           summary: esEdicion ? 'Proyecto actualizado' : 'Proyecto creado',

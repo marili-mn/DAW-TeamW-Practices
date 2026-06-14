@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { API_URL } from './api.config';
 import {
@@ -37,9 +37,29 @@ export class ApiService {
     return this.http.patch<Cliente>(`${API_URL}/clientes/${id}`, cambios);
   }
 
-  // Proyectos
-  getProyectos() {
-    return this.http.get<Proyecto[]>(`${API_URL}/proyectos`);
+  // Proyectos — búsqueda avanzada (paginado, filtrado, ordenado).
+  // Sin opts usa los defaults del back (page=1, pageSize=10, sort=nombre ASC).
+  getProyectos(opts: {
+    nombre?: string;
+    estado?: EstadoProyecto;
+    clienteId?: number;
+    sort?: 'nombre' | 'estado' | 'fecha_fin' | 'id';
+    dir?: 'ASC' | 'DESC';
+    page?: number;
+    pageSize?: number;
+  } = {}) {
+    let params = new HttpParams();
+    for (const [k, v] of Object.entries(opts)) {
+      if (v !== undefined && v !== null && v !== '') {
+        params = params.set(k, String(v));
+      }
+    }
+    return this.http.get<{
+      data: Proyecto[];
+      total: number;
+      page: number;
+      pageSize: number;
+    }>(`${API_URL}/proyectos`, { params });
   }
 
   getProyecto(id: number) {

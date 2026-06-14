@@ -26,6 +26,55 @@ export class ProyectosService {
     });
   }
 
+  // Búsqueda avanzada con filtros, ordenamiento y paginación.
+  // Devuelve el shape estándar {data, total, page, pageSize}.
+  async search(opts: {
+    nombre?: string;
+    estado?: EstadoProyecto;
+    clienteId?: number;
+    sort?: string;
+    dir?: string;
+    page?: number;
+    pageSize?: number;
+  }): Promise<{
+    data: Proyecto[];
+    total: number;
+    page: number;
+    pageSize: number;
+  }> {
+    const qb = this.proyectosRepository
+      .createQueryBuilder('p')
+      .leftJoinAndSelect('p.cliente', 'cliente');
+
+    if (opts.nombre) {
+      qb.andWhere('p.nombre ILIKE :nombre', { nombre: `%${opts.nombre}%` });
+    }
+    if (opts.estado) {
+      qb.andWhere('p.estado = :estado', { estado: opts.estado });
+    }
+    if (opts.clienteId !== undefined && opts.clienteId !== null) {
+      qb.andWhere('cliente.id = :cid', { cid: opts.clienteId });
+    }
+
+    // Whitelist de columnas ordenables para evitar SQL injection vía sort.
+    const camposOrdenables: Record<string, string> = {
+      nombre: 'p.nombre',
+      estado: 'p.estado',
+      fecha_fin: 'p.fecha_fin',
+      id: 'p.id',
+    };
+    const sortField = camposOrdenables[opts.sort ?? ''] ?? 'p.nombre';
+    const dir = opts.dir?.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+    qb.orderBy(sortField, dir);
+
+    const page = Math.max(1, Number(opts.page) || 1);
+    const pageSize = Math.min(200, Math.max(1, Number(opts.pageSize) || 10));
+    qb.skip((page - 1) * pageSize).take(pageSize);
+
+    const [data, total] = await qb.getManyAndCount();
+    return { data, total, page, pageSize };
+  }
+
   async findOne(id: number): Promise<Proyecto> {
     const proyecto = await this.proyectosRepository.findOne({
       where: { id },
