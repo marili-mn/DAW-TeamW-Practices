@@ -4,7 +4,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://TU-RENDER-URL.onrender.com/api/:path*"
+      "destination": "https://tfi-backend-rwwq.onrender.com/api/:path*"
     },
     {
       "source": "/(.*)",
