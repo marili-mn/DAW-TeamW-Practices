@@ -16,6 +16,17 @@
       <i class="pi pi-user"></i>
       {{ p.cliente?.nombre ?? 'Proyecto interno (sin cliente)' }}
     </p>
+    @if (p.fechaFin) {
+      <p class="texto-suave">
+        <i class="pi pi-calendar"></i>
+        Fecha fin objetivo: <strong>{{ p.fechaFin }}</strong>
+        @if (estaAtrasado()) {
+          <p-tag value="ATRASADO" severity="danger" class="ms-2" />
+        } @else if (diasRestantes() !== null) {
+          <span class="ms-2">({{ diasRestantes() }} días restantes)</span>
+        }
+      </p>
+    }
   </div>
 
   <div class="page-header">

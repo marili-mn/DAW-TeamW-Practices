@@ -1,5 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import {
+  IsDateString,
   IsEnum,
   IsInt,
   IsNotEmpty,
@@ -30,4 +31,14 @@ export class UpdateProyectoDto {
   @ValidateIf((_, value) => value !== null)
   @IsInt()
   id_cliente?: number | null;
+
+  @ApiPropertyOptional({
+    example: '2026-12-31',
+    nullable: true,
+    description: 'Fecha de finalización objetivo. Enviar null para quitarla.',
+  })
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null)
+  @IsDateString()
+  fecha_fin?: string | null;
 }

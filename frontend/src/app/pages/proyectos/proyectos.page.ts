@@ -48,6 +48,7 @@ export class ProyectosPage {
   formNombre = '';
   formEstado: EstadoProyecto = 'ACTIVO';
   formIdCliente: number | null = null;
+  formFechaFin: string | null = null;
 
   ngOnInit(): void {
     this.cargar();
@@ -73,6 +74,7 @@ export class ProyectosPage {
     this.formNombre = '';
     this.formEstado = 'ACTIVO';
     this.formIdCliente = null;
+    this.formFechaFin = null;
     this.cargarClientesActivos();
     this.dialogoVisible.set(true);
   }
@@ -83,6 +85,7 @@ export class ProyectosPage {
     this.formNombre = proyecto.nombre;
     this.formEstado = proyecto.estado;
     this.formIdCliente = proyecto.cliente?.id ?? null;
+    this.formFechaFin = proyecto.fechaFin ?? null;
     this.cargarClientesActivos();
     this.dialogoVisible.set(true);
   }
@@ -148,12 +151,14 @@ export class ProyectosPage {
           nombre,
           estado: this.formEstado,
           id_cliente: this.formIdCliente,
+          fecha_fin: this.formFechaFin || null,
         })
       : this.api.createProyecto({
           nombre,
           ...(this.formIdCliente !== null && {
             id_cliente: this.formIdCliente,
           }),
+          ...(this.formFechaFin && { fecha_fin: this.formFechaFin }),
         });
 
     peticion.subscribe({
@@ -186,5 +191,21 @@ export class ProyectosPage {
       : estado === 'FINALIZADO'
         ? 'info'
         : 'danger';
+  }
+
+  // Días restantes hasta la fecha fin (negativo = atrasado).
+  // Null si el proyecto no tiene fecha objetivo.
+  diasRestantes(p: Proyecto): number | null {
+    if (!p.fechaFin) return null;
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    const objetivo = new Date(p.fechaFin);
+    return Math.round((objetivo.getTime() - hoy.getTime()) / 86400000);
+  }
+
+  // Un proyecto está atrasado si tiene fecha fin pasada y sigue activo.
+  estaAtrasado(p: Proyecto): boolean {
+    const dias = this.diasRestantes(p);
+    return p.estado === 'ACTIVO' && dias !== null && dias < 0;
   }
 }

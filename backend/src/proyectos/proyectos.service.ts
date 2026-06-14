@@ -43,6 +43,7 @@ export class ProyectosService {
     const proyecto = this.proyectosRepository.create({
       nombre: createProyectoDto.nombre,
       estado: EstadoProyecto.ACTIVO,
+      fechaFin: createProyectoDto.fecha_fin ?? null,
       cliente,
     });
     const guardado = await this.proyectosRepository.save(proyecto);
@@ -65,6 +66,9 @@ export class ProyectosService {
       proyecto.cliente = await this.resolverCliente(
         updateProyectoDto.id_cliente,
       );
+    }
+    if (updateProyectoDto.fecha_fin !== undefined) {
+      proyecto.fechaFin = updateProyectoDto.fecha_fin;
     }
 
     await this.proyectosRepository.save(proyecto);

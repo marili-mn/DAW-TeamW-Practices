@@ -26,6 +26,9 @@ export class Proyecto {
   @Column({ type: 'enum', enum: EstadoProyecto, enumName: 'estados_proyectos' })
   estado: EstadoProyecto;
 
+  @Column({ name: 'fecha_fin', type: 'date', nullable: true })
+  fechaFin: string | null;
+
   @ManyToOne(() => Cliente, { nullable: true })
   @JoinColumn({ name: 'id_cliente' })
   cliente: Cliente | null;

@@ -32,6 +32,7 @@
         <th pSortableColumn="cliente.nombre">
           Cliente <p-sortIcon field="cliente.nombre" />
         </th>
+        <th pSortableColumn="fechaFin">Fecha fin <p-sortIcon field="fechaFin" /></th>
         <th pSortableColumn="estado">Estado <p-sortIcon field="estado" /></th>
         <th style="width: 9rem">Acciones</th>
       </tr>
@@ -44,6 +45,16 @@
             {{ proyecto.cliente.nombre }}
           } @else {
             <span class="texto-suave">Proyecto interno</span>
+          }
+        </td>
+        <td>
+          @if (proyecto.fechaFin) {
+            {{ proyecto.fechaFin }}
+            @if (estaAtrasado(proyecto)) {
+              <p-tag value="ATRASADO" severity="danger" class="ms-2" />
+            }
+          } @else {
+            <span class="texto-suave">—</span>
           }
         </td>
         <td>
@@ -70,7 +81,7 @@
     </ng-template>
     <ng-template #emptymessage>
       <tr>
-        <td colspan="4">
+        <td colspan="5">
           <div class="estado-vacio">
             <i class="pi pi-folder-open"></i>
             <p>No hay proyectos cargados.</p>
@@ -147,6 +158,15 @@
       Solo se listan clientes en estado ACTIVO. Podés crear uno nuevo con
       <i class="pi pi-user-plus"></i>.
     </small>
+
+    <label for="p-fecha-fin">Fecha fin objetivo (opcional)</label>
+    <input
+      pInputText
+      id="p-fecha-fin"
+      name="fechaFin"
+      type="date"
+      [(ngModel)]="formFechaFin"
+    />
   </div>
 
   <ng-template #footer>

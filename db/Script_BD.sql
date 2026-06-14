@@ -25,6 +25,7 @@ CREATE TABLE proyectos (
     nombre TEXT NOT NULL UNIQUE,
     estado estados_proyectos NOT NULL,
     id_cliente INT,
+    fecha_fin DATE,
     CONSTRAINT fk_proyectos_cliente
         FOREIGN KEY (id_cliente)
         REFERENCES clientes (id)

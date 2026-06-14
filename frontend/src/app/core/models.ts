@@ -22,6 +22,7 @@ export interface Proyecto {
   nombre: string;
   estado: EstadoProyecto;
   cliente: Cliente | null;
+  fechaFin?: string | null;
   tareas?: Tarea[];
 }
 

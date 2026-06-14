@@ -46,7 +46,11 @@ export class ApiService {
     return this.http.get<Proyecto>(`${API_URL}/proyectos/${id}`);
   }
 
-  createProyecto(datos: { nombre: string; id_cliente?: number }) {
+  createProyecto(datos: {
+    nombre: string;
+    id_cliente?: number;
+    fecha_fin?: string;
+  }) {
     return this.http.post<Proyecto>(`${API_URL}/proyectos`, datos);
   }
 
@@ -56,6 +60,7 @@ export class ApiService {
       nombre?: string;
       estado?: EstadoProyecto;
       id_cliente?: number | null;
+      fecha_fin?: string | null;
     },
   ) {
     return this.http.patch<Proyecto>(`${API_URL}/proyectos/${id}`, cambios);

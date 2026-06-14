@@ -243,4 +243,19 @@ export class ProyectoDetallePage {
         ? 'info'
         : 'danger';
   }
+
+  // Días restantes hasta fecha fin (negativo = atrasado).
+  readonly diasRestantes = computed(() => {
+    const p = this.proyecto();
+    if (!p?.fechaFin) return null;
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    const objetivo = new Date(p.fechaFin);
+    return Math.round((objetivo.getTime() - hoy.getTime()) / 86400000);
+  });
+
+  readonly estaAtrasado = computed(() => {
+    const dias = this.diasRestantes();
+    return this.proyecto()?.estado === 'ACTIVO' && dias !== null && dias < 0;
+  });
 }
