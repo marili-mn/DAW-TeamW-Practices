@@ -192,13 +192,13 @@ CREATE TABLE historial (
 
 ## Equipo
 
-| Integrante | Feature principal |
-|---|---|
-| Nahuel Marcilli | Base MVP · Roles · Búsqueda avanzada · Kanban |
-| Mai | Estadísticas · Fecha de fin / ATRASADO · CSV export |
-| Javier | Historial de cambios |
-| Denise | Datos de contacto de clientes |
-| Juli | CRUD de Usuarios |
+| Integrante | Feature principal | GitHub |
+|---|---|---|
+| Nahuel Marcilli | Base MVP · Roles · Búsqueda avanzada · Kanban | [@marili-mn](https://github.com/marili-mn) |
+| Denise Aguilera | Estadísticas · Fecha de fin / ATRASADO · CSV export | [@dennaguilera](https://github.com/dennaguilera) |
+| Francisco Javier Acosta | Historial de cambios | [@profesorjavier](https://github.com/profesorjavier) |
+| Denise Ailen Lescano | Datos de contacto de clientes | [@DeniLescano](https://github.com/DeniLescano) |
+| Julieta Roveres | CRUD de Usuarios | [@JulietaRoveres](https://github.com/JulietaRoveres) |
 
 ---
 
