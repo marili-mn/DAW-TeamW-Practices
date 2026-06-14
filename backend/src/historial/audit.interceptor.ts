@@ -21,6 +21,7 @@ const ENTIDADES: Record<string, string> = {
   proyectos: 'proyecto',
   clientes: 'cliente',
   tareas: 'tarea',
+  usuarios: 'usuario',
 };
 
 @Injectable()
