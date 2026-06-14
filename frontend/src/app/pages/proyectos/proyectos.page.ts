@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
@@ -29,7 +29,7 @@ import { Cliente, EstadoProyecto, Proyecto } from '../../core/models';
   ],
   templateUrl: './proyectos.page.html',
 })
-export class ProyectosPage {
+export class ProyectosPage implements OnInit {
   private readonly api = inject(ApiService);
   private readonly messages = inject(MessageService);
   private readonly router = inject(Router);

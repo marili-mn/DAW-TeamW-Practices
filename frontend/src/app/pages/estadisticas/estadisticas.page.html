@@ -3,7 +3,13 @@
 </div>
 
 @if (cargando()) {
-  <p class="texto-suave">Cargando métricas...</p>
+  <p class="texto-suave"><i class="pi pi-spin pi-spinner"></i> Cargando métricas...</p>
+} @else if (error()) {
+  <div class="estado-vacio">
+    <i class="pi pi-exclamation-triangle" style="color: #ef4444"></i>
+    <p>{{ error() }}</p>
+    <p-button label="Reintentar" icon="pi pi-refresh" (onClick)="cargar()" />
+  </div>
 } @else if (data(); as e) {
   <!-- Cards de totales: 6 indicadores rápidos, con acento de color e ícono. -->
   <div class="cards-totales">
