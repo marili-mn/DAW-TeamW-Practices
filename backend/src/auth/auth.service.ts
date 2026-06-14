@@ -17,8 +17,9 @@ export class AuthService {
   async login(
     loginDto: LoginDto,
   ): Promise<{ access_token: string; nombre: string; rol: string }> {
-    const usuario = await this.usuariosRepository.findOneBy({
-      nombre: loginDto.nombre,
+    const usuario = await this.usuariosRepository.findOne({
+      where: { nombre: loginDto.nombre },
+      select: { id: true, nombre: true, clave: true, estado: true, rol: true },
     });
 
     const claveValida =

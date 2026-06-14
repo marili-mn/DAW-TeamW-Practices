@@ -23,6 +23,16 @@ export class UsuariosService {
     return usuario;
   }
 
+  /** Fetch interno con clave incluida — solo para operaciones que la necesiten. */
+  private async _findConClave(id: number): Promise<Usuario> {
+    const usuario = await this.usuariosRepository.findOne({
+      where: { id },
+      select: { id: true, nombre: true, clave: true, estado: true, rol: true },
+    });
+    if (!usuario) throw new NotFoundException(`Usuario ${id} no encontrado`);
+    return usuario;
+  }
+
   async create(dto: CreateUsuarioDto): Promise<Usuario> {
     const existe = await this.usuariosRepository.findOneBy({ nombre: dto.nombre });
     if (existe) throw new ConflictException('Ya existe un usuario con ese nombre');
@@ -32,14 +42,16 @@ export class UsuariosService {
       clave,
       estado: EstadoUsuario.ACTIVO,
     });
-    return this.usuariosRepository.save(usuario);
+    await this.usuariosRepository.save(usuario);
+    return this.findOne(usuario.id);
   }
 
   async update(id: number, dto: UpdateUsuarioDto): Promise<Usuario> {
-    const usuario = await this.findOne(id);
+    const usuario = await this._findConClave(id);
     if (dto.nombre) usuario.nombre = dto.nombre;
     if (dto.clave) usuario.clave = await bcrypt.hash(dto.clave, 10);
     if (dto.estado) usuario.estado = dto.estado;
-    return this.usuariosRepository.save(usuario);
+    await this.usuariosRepository.save(usuario);
+    return this.findOne(id);
   }
 }

@@ -18,7 +18,7 @@ export class Usuario {
   @Column({ type: 'text', unique: true })
   nombre: string;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'text', select: false })
   clave: string;
 
   @Column({ type: 'enum', enum: EstadoUsuario, enumName: 'estados_usuarios' })
