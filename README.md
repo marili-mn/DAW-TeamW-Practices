@@ -8,7 +8,8 @@ Trabajo Final Integrador · Tecnicatura Universitaria en Desarrollo Web · Team 
 |---|---|
 | Backend | NestJS 11 · TypeORM · PostgreSQL 18 |
 | Frontend | Angular 21 · PrimeNG · Standalone components |
-| Deploy | nginx 1.30.2 · PM2 7.0.1 |
+| Deploy local | nginx 1.30.2 · PM2 7.0.1 |
+| Deploy nube | Vercel (frontend) · Render (backend + DB) |
 | Orquestador | Python 3 (`manage.py`) |
 
 ## Funcionalidades implementadas
@@ -84,6 +85,76 @@ python manage.py stop     Detiene PM2 y nginx
 python manage.py status   Estado de DB, nginx, PM2 y puertos con URLs
 python manage.py logs     Logs del backend en tiempo real (PM2)
 ```
+
+## Despliegue en la nube (Vercel + Render)
+
+La rama `deploy` contiene la configuración lista para desplegar el sistema en internet sin Docker.
+
+### Arquitectura
+
+```
+Browser → Vercel (Angular estático)
+            ↓ /api/* rewrite (vercel.json)
+          Render Web Service (NestJS · Node)
+            ↓
+          Render PostgreSQL (tfi-db)
+```
+
+### Servicios
+
+| Servicio | Plataforma | URL |
+|---|---|---|
+| Frontend | Vercel | `https://tfi-daw.vercel.app` |
+| Backend | Render Web Service | `https://tfi-backend-rwwq.onrender.com` |
+| Base de datos | Render PostgreSQL | interna al Web Service |
+
+### Variables de entorno en Render
+
+| Variable | Descripción |
+|---|---|
+| `NODE_ENV` | `production` |
+| `DATABASE_URL` | URL interna de Render PostgreSQL (automática) |
+| `JWT_SECRET` | String secreto para firmar tokens |
+| `FRONTEND_URL` | URL de Vercel (para CORS) |
+| `PORT` | `10000` |
+
+### Cómo funciona el proxy
+
+El `frontend/vercel.json` redirige todas las llamadas `/api/*` al backend en Render.
+El código Angular usa siempre rutas relativas (`/api/...`) — no cambia entre local y producción.
+
+```json
+{ "source": "/api/:path*", "destination": "https://tfi-backend-rwwq.onrender.com/api/:path*" }
+```
+
+### Conexión a la base de datos
+
+Si existe `DATABASE_URL` (Render), el backend la parsea y activa SSL automáticamente.
+En local usa las variables individuales `DB_HOST / DB_PORT / DB_USER / DB_PASS / DB_NAME`.
+
+### Swagger en producción
+
+Deshabilitado por defecto cuando `NODE_ENV=production`. Para habilitarlo temporalmente:
+
+```bash
+python manage.py swagger on   # escribe SWAGGER=true en .env y reinicia PM2
+python manage.py swagger off  # lo vuelve a deshabilitar
+```
+
+En Render se puede habilitar agregando `SWAGGER=true` en las variables de entorno del servicio.
+
+### Aplicar schema y seed en la DB de Render (una vez)
+
+```powershell
+$env:PGPASSWORD = "<password de Render>"
+psql -h <host>.oregon-postgres.render.com -U <user> <dbname> -f db/Script_BD.sql
+psql -h <host>.oregon-postgres.render.com -U <user> <dbname> -f db/seed-demo.sql
+```
+
+> Los datos de conexión están en el dashboard de Render → tfi-db → Connections → PSQL Command.
+
+> **Limitación free tier**: Render apaga el backend tras 15 min de inactividad.
+> El primer request tras inactividad tarda ~30 seg en responder.
 
 ## Credenciales por defecto
 
