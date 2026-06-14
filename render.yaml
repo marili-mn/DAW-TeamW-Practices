@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: tfi-backend
+    env: node
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: node dist/main.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: tfi-db
+          property: connectionString
+      - key: FRONTEND_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: PORT
+        value: 10000
+
+databases:
+  - name: tfi-db
+    databaseName: tfi
+    plan: free
