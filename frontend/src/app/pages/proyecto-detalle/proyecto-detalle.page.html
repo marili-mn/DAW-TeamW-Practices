@@ -119,6 +119,7 @@
       @for (col of columnas(); track col.estado) {
         <div
           class="columna"
+          [attr.data-estado]="col.estado"
           [class.columna--activa]="tareaArrastrada"
           (dragover)="permitirDrop($event)"
           (drop)="soltarEn(col.estado)"
@@ -128,39 +129,41 @@
             <span class="contador">{{ col.tareas.length }}</span>
           </div>
 
-          @for (tarea of col.tareas; track tarea.id) {
-            <div
-              class="tarjeta"
-              [attr.data-estado]="tarea.estado"
-              draggable="true"
-              (dragstart)="empezarArrastre(tarea)"
-              (dragend)="tareaArrastrada = null"
-            >
-              <p class="tarjeta-desc">{{ tarea.descripcion }}</p>
-              <div class="tarjeta-acciones">
-                <p-button
-                  icon="pi pi-pencil"
-                  severity="secondary"
-                  [text]="true"
-                  [rounded]="true"
-                  ariaLabel="Editar tarea"
-                  (onClick)="abrirEdicion(tarea)"
-                />
-                @if (auth.esAdmin()) {
+          <div class="columna-cuerpo">
+            @for (tarea of col.tareas; track tarea.id) {
+              <div
+                class="tarjeta"
+                [attr.data-estado]="tarea.estado"
+                draggable="true"
+                (dragstart)="empezarArrastre(tarea)"
+                (dragend)="tareaArrastrada = null"
+              >
+                <p class="tarjeta-desc">{{ tarea.descripcion }}</p>
+                <div class="tarjeta-acciones">
                   <p-button
-                    icon="pi pi-trash"
-                    severity="danger"
+                    icon="pi pi-pencil"
+                    severity="secondary"
                     [text]="true"
                     [rounded]="true"
-                    ariaLabel="Eliminar tarea"
-                    (onClick)="eliminar(tarea)"
+                    ariaLabel="Editar tarea"
+                    (onClick)="abrirEdicion(tarea)"
                   />
-                }
+                  @if (auth.esAdmin()) {
+                    <p-button
+                      icon="pi pi-trash"
+                      severity="danger"
+                      [text]="true"
+                      [rounded]="true"
+                      ariaLabel="Eliminar tarea"
+                      (onClick)="eliminar(tarea)"
+                    />
+                  }
+                </div>
               </div>
-            </div>
-          } @empty {
-            <p class="columna-vacia">Sin tareas</p>
-          }
+            } @empty {
+              <p class="columna-vacia">Sin tareas</p>
+            }
+          </div>
         </div>
       }
     </div>

@@ -109,6 +109,39 @@
   padding: 1.5rem;
   max-width: 1180px;
   margin: 0 auto;
+  min-height: calc(100vh - 4rem - 3rem);  /* deja espacio para topbar + footer */
+}
+
+/* === Footer ============================================================
+   Reservado, slate-800 oscuro como el topbar para enmarcar la app. */
+.pie {
+  background: #1e293b;
+  color: #cbd5e1;
+  padding: 0.85rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  border-top: 1px solid #0f172a;
+}
+
+.pie strong {
+  color: #ffffff;
+}
+
+.pie-uner {
+  color: #94a3b8;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+@media (max-width: 640px) {
+  .pie {
+    flex-direction: column;
+    gap: 0.25rem;
+    text-align: center;
+    padding: 0.75rem 1rem;
+  }
 }
 
 @media (max-width: 640px) {

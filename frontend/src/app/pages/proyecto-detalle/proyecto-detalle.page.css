@@ -4,7 +4,10 @@
   align-items: center;
 }
 
-/* Tablero: 3 columnas en escritorio, 1 en mobile */
+/* === Tablero kanban =====================================================
+   3 columnas con marco definido y cabecera con barra de color por estado.
+   En mobile colapsa a 1 columna. */
+
 .tablero {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -13,20 +16,24 @@
 }
 
 .columna {
-  background: var(--p-surface-100, #f1f5f9);
-  border: 1px solid var(--p-surface-200, #e2e8f0);
+  background: #f8fafc;                  /* slate-50 — bien claro pero distinto del body */
+  border: 1px solid #cbd5e1;            /* slate-300 — marco definido */
   border-radius: 0.75rem;
-  padding: 0.75rem;
-  min-height: 8rem;
+  padding: 0;
+  min-height: 10rem;
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
-  transition: outline 0.15s ease;
+  transition: outline 0.15s ease, box-shadow 0.15s ease;
+  overflow: hidden;
 }
 
-/* Mientras se arrastra una tarjeta, se resaltan las zonas donde soltar */
+.columna:hover {
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.06);
+}
+
+/* Mientras se arrastra una tarjeta, se resalta la zona donde soltar */
 .columna--activa {
-  outline: 2px dashed var(--p-primary-color, #3b82f6);
+  outline: 2px dashed #4338ca;
   outline-offset: 2px;
 }
 
@@ -34,29 +41,74 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.95rem;
+  padding: 0.75rem 0.9rem;
+  background: #ffffff;
+  color: #0f172a;
+  border-bottom: 1px solid #cbd5e1;
+  border-top: 4px solid #475569;        /* default slate-600 */
+}
+
+/* Acento de cabecera por estado */
+.columna[data-estado="PENDIENTE"] .columna-titulo {
+  border-top-color: #d97706;            /* amber-600 */
+}
+.columna[data-estado="PENDIENTE"] .columna-titulo i {
+  color: #b45309;
+}
+.columna[data-estado="FINALIZADA"] .columna-titulo {
+  border-top-color: #059669;            /* emerald-600 */
+}
+.columna[data-estado="FINALIZADA"] .columna-titulo i {
+  color: #047857;
+}
+.columna[data-estado="BAJA"] .columna-titulo {
+  border-top-color: #b91c1c;            /* red-700 */
+}
+.columna[data-estado="BAJA"] .columna-titulo i {
+  color: #b91c1c;
 }
 
 .columna-titulo .contador {
-  background: var(--p-surface-0, #ffffff);
-  border: 1px solid var(--p-surface-200, #e2e8f0);
+  background: #f1f5f9;                  /* slate-100 */
+  border: 1px solid #cbd5e1;
   border-radius: 999px;
-  padding: 0 0.55rem;
+  padding: 0.1rem 0.7rem;
   font-size: 0.8rem;
+  font-weight: 700;
+  color: #1e293b;
+  min-width: 1.85rem;
+  text-align: center;
+}
+
+/* Zona de tarjetas con padding propio para que el borde de la columna
+   no quede cortado. */
+.columna-cuerpo {
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  flex: 1;
 }
 
 .tarjeta {
-  background: var(--p-surface-0, #ffffff);
-  border: 1px solid var(--p-surface-200, #e2e8f0);
-  border-left: 4px solid var(--p-surface-300, #cbd5e1);
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-left: 4px solid #94a3b8;       /* slate-400 default */
   border-radius: 0.6rem;
-  padding: 0.6rem 0.7rem;
+  padding: 0.7rem 0.8rem;
   cursor: grab;
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.tarjeta:hover {
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
+  transform: translateY(-1px);
 }
 
 .tarjeta:active {
@@ -65,19 +117,21 @@
 
 /* Color del borde izquierdo según el estado de la tarea */
 .tarjeta[data-estado="PENDIENTE"] {
-  border-left-color: #f59e0b;
+  border-left-color: #d97706;           /* amber-600 */
 }
 .tarjeta[data-estado="FINALIZADA"] {
-  border-left-color: #22c55e;
+  border-left-color: #059669;           /* emerald-600 */
 }
 .tarjeta[data-estado="BAJA"] {
-  border-left-color: #ef4444;
+  border-left-color: #b91c1c;           /* red-700 */
 }
 
 .tarjeta-desc {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 0.92rem;
+  color: #0f172a;                       /* slate-900 — bien oscuro */
   word-break: break-word;
+  font-weight: 500;
 }
 
 .tarjeta-acciones {
@@ -87,11 +141,12 @@
 }
 
 .columna-vacia {
-  color: var(--p-text-muted-color, #94a3b8);
+  color: #64748b;                       /* slate-500 */
   font-size: 0.85rem;
   text-align: center;
-  padding: 0.75rem 0;
+  padding: 1.5rem 0;
   margin: 0;
+  font-style: italic;
 }
 
 @media (max-width: 720px) {

@@ -182,27 +182,38 @@ h3 {
 
 /* === Overrides puntuales a componentes PrimeNG para más contraste ======= */
 
-/* Tablas: header con fondo más definido y texto fuerte. */
+/* Tablas: filas blancas, header gris claro, texto siempre oscuro. */
+.p-datatable,
+.p-datatable .p-datatable-table,
+.p-datatable .p-datatable-tbody,
+.p-datatable .p-datatable-tbody > tr {
+  background: var(--tfi-surface) !important;
+  color: var(--tfi-text) !important;
+}
+
 .p-datatable .p-datatable-thead > tr > th {
   background: var(--tfi-surface-2) !important;
   color: var(--tfi-text) !important;
-  font-weight: 600 !important;
-  border-bottom: 1px solid var(--tfi-border) !important;
+  font-weight: 700 !important;
+  border-bottom: 2px solid var(--tfi-border) !important;
 }
 
 .p-datatable .p-datatable-tbody > tr > td {
-  color: var(--tfi-text-2);
+  background: var(--tfi-surface) !important;
+  color: var(--tfi-text) !important;
   border-bottom: 1px solid var(--tfi-border-soft) !important;
 }
 
-.p-datatable .p-datatable-tbody > tr:hover {
-  background: var(--tfi-surface-2) !important;
+.p-datatable .p-datatable-tbody > tr:hover > td {
+  background: #f8fafc !important;     /* slate-50 — apenas se nota pero ayuda */
 }
 
 /* Inputs con borde definido. */
 .p-inputtext,
 .p-select,
 .p-password input {
+  background: #ffffff !important;
+  color: var(--tfi-text) !important;
   border-color: var(--tfi-border) !important;
 }
 
@@ -210,6 +221,114 @@ h3 {
 .p-select.p-focus {
   border-color: var(--tfi-primary) !important;
   box-shadow: 0 0 0 3px rgba(67, 56, 202, 0.15) !important;
+}
+
+/* === Tags de estado: colores saturados, texto bien legible ===============
+   El Aura default los pinta pastel y casi se pierden sobre fondo claro.
+   Forzamos fondo sólido medio + texto blanco / casi blanco. */
+
+.p-tag {
+  font-weight: 700 !important;
+  letter-spacing: 0.04em !important;
+  padding: 0.3rem 0.65rem !important;
+  border-radius: 0.4rem !important;
+}
+
+.p-tag.p-tag-success {
+  background: #047857 !important;       /* emerald-700 */
+  color: #ffffff !important;
+}
+
+.p-tag.p-tag-info {
+  background: #1e40af !important;       /* blue-800 */
+  color: #ffffff !important;
+}
+
+.p-tag.p-tag-warn,
+.p-tag.p-tag-warning {
+  background: #b45309 !important;       /* amber-700 */
+  color: #ffffff !important;
+}
+
+.p-tag.p-tag-danger {
+  background: #b91c1c !important;       /* red-700 */
+  color: #ffffff !important;
+}
+
+.p-tag.p-tag-secondary {
+  background: #475569 !important;       /* slate-600 */
+  color: #ffffff !important;
+}
+
+/* === Toast: fondo slate translúcido con texto bien claro =================
+   Antes era casi negro denso. Ahora con backdrop-filter blur queda
+   moderno pero todavía legible. */
+
+.p-toast {
+  opacity: 1 !important;
+}
+
+.p-toast .p-toast-message {
+  background: rgba(30, 41, 59, 0.92) !important;  /* slate-800 ~92% */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #f1f5f9 !important;                       /* slate-100 */
+  border: 1px solid rgba(148, 163, 184, 0.3) !important;
+  border-radius: 0.65rem !important;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.3) !important;
+}
+
+.p-toast .p-toast-message .p-toast-message-text,
+.p-toast .p-toast-message .p-toast-summary,
+.p-toast .p-toast-message .p-toast-detail {
+  color: #f1f5f9 !important;
+}
+
+.p-toast .p-toast-message .p-toast-summary {
+  font-weight: 700 !important;
+}
+
+.p-toast .p-toast-message .p-toast-detail {
+  color: #cbd5e1 !important;                       /* slate-300 */
+}
+
+.p-toast .p-toast-message-icon,
+.p-toast .p-toast-close-icon {
+  color: #f1f5f9 !important;
+}
+
+/* Acento a la izquierda según severidad — más reconocible que el fondo
+   distinto que ponía Aura. */
+.p-toast .p-toast-message-success {
+  border-left: 4px solid #10b981 !important;
+}
+.p-toast .p-toast-message-info {
+  border-left: 4px solid #3b82f6 !important;
+}
+.p-toast .p-toast-message-warn,
+.p-toast .p-toast-message-warning {
+  border-left: 4px solid #f59e0b !important;
+}
+.p-toast .p-toast-message-error {
+  border-left: 4px solid #ef4444 !important;
+}
+
+/* === Diálogos modales — header y body con buen contraste ================ */
+
+.p-dialog .p-dialog-header {
+  background: var(--tfi-surface-2) !important;
+  color: var(--tfi-text) !important;
+  border-bottom: 1px solid var(--tfi-border) !important;
+}
+
+.p-dialog .p-dialog-content {
+  background: var(--tfi-surface) !important;
+  color: var(--tfi-text) !important;
+}
+
+.p-dialog .p-dialog-footer {
+  background: var(--tfi-surface) !important;
+  border-top: 1px solid var(--tfi-border-soft) !important;
 }
 
 @media (max-width: 640px) {

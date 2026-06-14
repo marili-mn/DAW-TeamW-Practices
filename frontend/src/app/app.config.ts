@@ -13,7 +13,14 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     provideHttpClient(withInterceptors([authInterceptor])),
-    providePrimeNG({ theme: { preset: Aura } }),
+    providePrimeNG({
+      theme: {
+        preset: Aura,
+        // Sin selector de dark mode: el tema siempre renderiza en claro
+        // (Chrome con dark del sistema estaba forzando filas casi negras).
+        options: { darkModeSelector: false },
+      },
+    }),
     MessageService,
     ConfirmationService,
   ],
