@@ -25,6 +25,6 @@ export const routes: Routes = [
   },
   { path: 'historial', component: HistorialPage, canActivate: [adminGuard] },
   { path: 'usuarios', component: UsuariosPage, canActivate: [adminGuard] },
-  { path: '', pathMatch: 'full', redirectTo: 'proyectos' },
-  { path: '**', redirectTo: 'proyectos' },
+  { path: '', pathMatch: 'full', redirectTo: 'estadisticas' },
+  { path: '**', redirectTo: 'estadisticas' },
 ];

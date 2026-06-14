@@ -5,29 +5,35 @@
 @if (cargando()) {
   <p class="texto-suave">Cargando métricas...</p>
 } @else if (data(); as e) {
-  <!-- Cards de totales: 6 indicadores rápidos -->
+  <!-- Cards de totales: 6 indicadores rápidos, con acento de color e ícono. -->
   <div class="cards-totales">
     <div class="card-total">
+      <i class="pi pi-folder card-icono"></i>
       <span class="card-numero">{{ e.totales.proyectos }}</span>
       <span class="card-label">Proyectos totales</span>
     </div>
-    <div class="card-total">
+    <div class="card-total card-activos">
+      <i class="pi pi-check-circle card-icono"></i>
       <span class="card-numero">{{ e.totales.proyectosActivos }}</span>
       <span class="card-label">Proyectos activos</span>
     </div>
     <div class="card-total" [class.card-alerta]="e.proyectosAtrasados > 0">
+      <i class="pi pi-exclamation-triangle card-icono"></i>
       <span class="card-numero">{{ e.proyectosAtrasados }}</span>
       <span class="card-label">Proyectos atrasados</span>
     </div>
-    <div class="card-total">
+    <div class="card-total card-activos">
+      <i class="pi pi-users card-icono"></i>
       <span class="card-numero">{{ e.totales.clientesActivos }}</span>
       <span class="card-label">Clientes activos</span>
     </div>
-    <div class="card-total">
+    <div class="card-total card-pendientes">
+      <i class="pi pi-clock card-icono"></i>
       <span class="card-numero">{{ e.totales.tareasPendientes }}</span>
       <span class="card-label">Tareas pendientes</span>
     </div>
     <div class="card-total">
+      <i class="pi pi-list card-icono"></i>
       <span class="card-numero">{{ e.totales.tareas }}</span>
       <span class="card-label">Tareas totales</span>
     </div>
@@ -35,7 +41,7 @@
 
   <!-- Distribución por estado: barras horizontales con porcentaje -->
   <div class="seccion-grafico">
-    <h3>Proyectos por estado</h3>
+    <h3><i class="pi pi-folder"></i> Proyectos por estado</h3>
     @for (item of e.proyectosPorEstado; track item.estado) {
       <div class="barra-fila">
         <p-tag [value]="item.estado" [severity]="severidadProyecto(item.estado)" />
@@ -53,13 +59,16 @@
   </div>
 
   <div class="seccion-grafico">
-    <h3>Tareas por estado</h3>
+    <h3><i class="pi pi-check-square"></i> Tareas por estado</h3>
     @for (item of e.tareasPorEstado; track item.estado) {
       <div class="barra-fila">
         <p-tag [value]="item.estado" [severity]="severidadTarea(item.estado)" />
         <div class="barra-contenedor">
           <div
             class="barra-fill"
+            [class.barra-fill--tarea-pendiente]="item.estado === 'PENDIENTE'"
+            [class.barra-fill--tarea-finalizada]="item.estado === 'FINALIZADA'"
+            [class.barra-fill--tarea-baja]="item.estado === 'BAJA'"
             [style.width.%]="porcentaje(item.cantidad, maxTareas())"
           ></div>
         </div>
@@ -72,7 +81,7 @@
 
   <!-- Ranking clientes -->
   <div class="seccion-grafico">
-    <h3>Top clientes por cantidad de proyectos</h3>
+    <h3><i class="pi pi-users"></i> Top clientes por cantidad de proyectos</h3>
     @for (item of e.topClientes; track item.cliente) {
       <div class="barra-fila">
         <span class="cliente-nombre">{{ item.cliente }}</span>

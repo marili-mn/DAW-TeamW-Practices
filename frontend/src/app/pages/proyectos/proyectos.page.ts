@@ -64,7 +64,12 @@ export class ProyectosPage {
   formIdCliente: number | null = null;
   formFechaFin: string | null = null;
 
-  // ngOnInit no carga: la p-table con lazy=true dispara cargarLazy al iniciar.
+  // Carga inicial forzada — en la práctica el lazy load de p-table no
+  // siempre se dispara al montar el componente (depende del lifecycle de
+  // routing). Sin esto, queda "Cargando..." en loop al entrar desde /login.
+  ngOnInit(): void {
+    this.cargarLazy({ first: 0, rows: this.pageSize });
+  }
 
   cargarLazy(event: TableLazyLoadEvent): void {
     this.ultimoEvento = event;

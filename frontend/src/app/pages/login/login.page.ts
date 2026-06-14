@@ -38,7 +38,7 @@ export class LoginPage {
     this.error.set('');
     this.cargando.set(true);
     this.auth.login(this.nombre, this.clave).subscribe({
-      next: () => this.router.navigate(['/proyectos']),
+      next: () => this.router.navigate(['/estadisticas']),
       error: () => {
         this.cargando.set(false);
         this.error.set('Credenciales inválidas');

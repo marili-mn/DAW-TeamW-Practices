@@ -64,6 +64,33 @@ h3 {
   max-width: 22rem;
 }
 
+/* Filtros server-side de la tabla de proyectos (input + select). */
+.filtros-busqueda {
+  display: flex;
+  gap: 0.75rem;
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+
+.filtros-busqueda p-iconfield {
+  flex: 1;
+  min-width: 14rem;
+}
+
+/* Margen pequeño para chips/tags después de un valor (ej: badge ATRASADO). */
+.ms-2 {
+  margin-left: 0.5rem;
+}
+
+/* Header de acciones (acciones-tareas) ya se usa en proyecto-detalle —
+   le damos un flex para que botones secundarios y primarios convivan. */
+.acciones-tareas {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
 .fila-clickeable {
   cursor: pointer;
 }
