@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { adminGuard } from './core/admin.guard';
 import { authGuard } from './core/auth.guard';
 import { LoginPage } from './pages/login/login.page';
 import { ProyectosPage } from './pages/proyectos/proyectos.page';
@@ -16,8 +17,8 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   { path: 'clientes', component: ClientesPage, canActivate: [authGuard] },
-  { path: 'historial', component: HistorialPage, canActivate: [authGuard] },
-  { path: 'usuarios', component: UsuariosPage, canActivate: [authGuard] },
+  { path: 'historial', component: HistorialPage, canActivate: [adminGuard] },
+  { path: 'usuarios', component: UsuariosPage, canActivate: [adminGuard] },
   { path: '', pathMatch: 'full', redirectTo: 'proyectos' },
   { path: '**', redirectTo: 'proyectos' },
 ];
