@@ -4,11 +4,12 @@
 Uso:
     python manage.py setup    Instala dependencias (npm) y descarga nginx
     python manage.py db       Crea rol/base de datos y ejecuta el script de la cátedra
+    python manage.py seed     Carga datos de demostración (seed-demo.sql)
     python manage.py dev      Levanta backend (watch) y frontend (ng serve) en modo desarrollo
     python manage.py build    Compila backend y frontend para producción
     python manage.py start    Despliegue: backend con PM2 + nginx sirviendo el frontend
     python manage.py stop     Detiene PM2 y nginx
-    python manage.py status   Estado de PM2 y puertos
+    python manage.py status   Estado detallado: DB, nginx, PM2 y puertos
     python manage.py logs     Logs del backend en PM2
 """
 
@@ -27,6 +28,7 @@ BACKEND = os.path.join(ROOT, "backend")
 FRONTEND = os.path.join(ROOT, "frontend")
 DEPLOY = os.path.join(ROOT, "deploy")
 DB_SCRIPT = os.path.join(ROOT, "db", "Script_BD.sql")
+DB_SEED = os.path.join(ROOT, "db", "seed-demo.sql")
 
 NGINX_VERSION = "1.30.2"
 NGINX_ZIP_URL = f"https://nginx.org/download/nginx-{NGINX_VERSION}.zip"
@@ -139,6 +141,20 @@ def cmd_db(args) -> None:
     print("\nBase de datos lista. Credenciales de la app: usuario / clave")
 
 
+def cmd_seed(_args) -> None:
+    if not os.path.isfile(DB_SEED):
+        sys.exit(f"No se encontró {DB_SEED}. Revisá que el archivo existe.")
+    psql = encontrar_psql()
+    print(f"\nAplicando datos de demostración...")
+    print(f"  Archivo  : {os.path.relpath(DB_SEED, ROOT)}")
+    print(f"  Conexión : {DB_USER}@localhost/{DB_NAME}")
+    run(
+        f'{psql} -U "{DB_USER}" -h localhost -d {DB_NAME} -f "{DB_SEED}"',
+        env={"PGPASSWORD": DB_PASS},
+    )
+    print("\nSeed aplicado. Datos de demo listos para el video.")
+
+
 def cmd_dev(_args) -> None:
     print("Levantando backend (:3000) y frontend (:4200)... Ctrl+C para detener.")
     procesos = [
@@ -197,10 +213,54 @@ def cmd_stop(_args) -> None:
 
 
 def cmd_status(_args) -> None:
+    sep = "─" * 54
+    print(f"\n{'═' * 54}")
+    print("  TFI — Estado del sistema")
+    print(f"{'═' * 54}")
+
+    # ── Base de datos ────────────────────────────────────────
+    print(f"\n  Base de datos")
+    print(f"    Host    : localhost:5432")
+    print(f"    DB      : {DB_NAME}")
+    print(f"    Usuario : {DB_USER}")
+
+    # ── nginx ────────────────────────────────────────────────
+    nginx_exe = encontrar_nginx()
+    print(f"\n  nginx")
+    if nginx_exe:
+        ver_result = subprocess.run(
+            [nginx_exe, "-v"], capture_output=True, text=True
+        )
+        nginx_ver = (ver_result.stderr or ver_result.stdout).strip()
+        print(f"    Versión : {nginx_ver}")
+        print(f"    Binario : {nginx_exe}")
+        print(f"    Config  : {os.path.join(DEPLOY, 'nginx.conf')}")
+    else:
+        print("    (no encontrado — ejecutá: python manage.py setup)")
+
+    # ── PM2 ─────────────────────────────────────────────────
+    print(f"\n  PM2 — procesos\n{sep}")
     run("pm2 list", check=False)
-    for nombre, puerto in (("backend (PM2)", 3000), ("nginx", 8080), ("frontend dev", 4200)):
-        estado = "ARRIBA" if puerto_abierto(puerto) else "abajo"
-        print(f"  :{puerto}  {nombre:<15} {estado}")
+    print(sep)
+
+    # ── Puertos ──────────────────────────────────────────────
+    print("  Puertos")
+    checks = [
+        (3000, "Backend API",   "http://localhost:3000/api"),
+        (3000, "Swagger docs",  "http://localhost:3000/docs"),
+        (8080, "nginx (prod)",  "http://localhost:8080"),
+        (4200, "Frontend dev",  "http://localhost:4200"),
+    ]
+    seen_ports: set[int] = set()
+    for puerto, nombre, url in checks:
+        if puerto not in seen_ports:
+            ok = puerto_abierto(puerto)
+            seen_ports.add(puerto)
+        icono = "✔" if ok else "✘"
+        estado = url if ok else "abajo"
+        print(f"    {icono} :{puerto}  {nombre:<16} {estado}")
+
+    print()
 
 
 def cmd_logs(_args) -> None:
@@ -221,6 +281,8 @@ def main() -> None:
     p_db = sub.add_parser("db", help="crea rol/base y ejecuta el script SQL")
     p_db.add_argument("--password", help="clave del usuario postgres (o usa PGPASSWORD)")
     p_db.set_defaults(fn=cmd_db)
+
+    sub.add_parser("seed", help="carga datos de demostración (seed-demo.sql)").set_defaults(fn=cmd_seed)
 
     sub.add_parser("dev", help="backend y frontend en modo desarrollo").set_defaults(fn=cmd_dev)
     sub.add_parser("build", help="compila backend y frontend").set_defaults(fn=cmd_build)
