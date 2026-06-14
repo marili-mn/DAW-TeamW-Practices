@@ -131,13 +131,13 @@ export class ApiService {
     return this.http.get<Usuario[]>(`${API_URL}/usuarios`);
   }
 
-  createUsuario(nombre: string, clave: string) {
-    return this.http.post<Usuario>(`${API_URL}/usuarios`, { nombre, clave });
+  createUsuario(nombre: string, clave: string, rol = 'ESTANDAR') {
+    return this.http.post<Usuario>(`${API_URL}/usuarios`, { nombre, clave, rol });
   }
 
   updateUsuario(
     id: number,
-    cambios: Partial<Pick<Usuario, 'nombre' | 'estado'>> & { clave?: string },
+    cambios: Partial<Pick<Usuario, 'nombre' | 'estado' | 'rol'>> & { clave?: string },
   ) {
     return this.http.patch<Usuario>(`${API_URL}/usuarios/${id}`, cambios);
   }

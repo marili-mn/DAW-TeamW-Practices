@@ -41,6 +41,7 @@ export class UsuariosService {
       nombre: dto.nombre,
       clave,
       estado: EstadoUsuario.ACTIVO,
+      rol: dto.rol,
     });
     await this.usuariosRepository.save(usuario);
     return this.findOne(usuario.id);
@@ -51,6 +52,7 @@ export class UsuariosService {
     if (dto.nombre) usuario.nombre = dto.nombre;
     if (dto.clave) usuario.clave = await bcrypt.hash(dto.clave, 10);
     if (dto.estado) usuario.estado = dto.estado;
+    if (dto.rol) usuario.rol = dto.rol;
     await this.usuariosRepository.save(usuario);
     return this.findOne(id);
   }

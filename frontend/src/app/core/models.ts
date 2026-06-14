@@ -39,6 +39,7 @@ export interface Usuario {
   id: number;
   nombre: string;
   estado: EstadoUsuario;
+  rol?: 'ADMIN' | 'ESTANDAR';
 }
 
 export interface Estadisticas {

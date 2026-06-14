@@ -6,6 +6,7 @@ import { TableModule } from 'primeng/table';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { TagModule } from 'primeng/tag';
+import { SelectModule } from 'primeng/select';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { ApiService } from '../../core/api.service';
@@ -22,6 +23,7 @@ import { Usuario } from '../../core/models';
     DialogModule,
     InputTextModule,
     TagModule,
+    SelectModule,
     IconFieldModule,
     InputIconModule,
   ],
@@ -38,6 +40,9 @@ export class UsuariosPage implements OnInit {
 
   formNombre = '';
   formClave = '';
+  formRol = 'ESTANDAR';
+
+  readonly roles = ['ADMIN', 'ESTANDAR'];
 
   constructor(private api: ApiService) {}
 
@@ -61,6 +66,7 @@ export class UsuariosPage implements OnInit {
     this.usuarioSeleccionado = null;
     this.formNombre = '';
     this.formClave = '';
+    this.formRol = 'ESTANDAR';
     this.dialogoVisible.set(true);
   }
 
@@ -69,13 +75,14 @@ export class UsuariosPage implements OnInit {
     this.usuarioSeleccionado = usuario;
     this.formNombre = usuario.nombre;
     this.formClave = '';
+    this.formRol = usuario.rol ?? 'ESTANDAR';
     this.dialogoVisible.set(true);
   }
 
   guardar() {
     this.guardando.set(true);
     if (this.editando && this.usuarioSeleccionado) {
-      const cambios: any = {};
+      const cambios: any = { rol: this.formRol };
       if (this.formNombre) cambios.nombre = this.formNombre;
       if (this.formClave) cambios.clave = this.formClave;
       this.api.updateUsuario(this.usuarioSeleccionado.id, cambios).subscribe({
@@ -83,7 +90,7 @@ export class UsuariosPage implements OnInit {
         error: () => this.guardando.set(false),
       });
     } else {
-      this.api.createUsuario(this.formNombre, this.formClave).subscribe({
+      this.api.createUsuario(this.formNombre, this.formClave, this.formRol).subscribe({
         next: () => { this.dialogoVisible.set(false); this.guardando.set(false); this.cargar(); },
         error: () => this.guardando.set(false),
       });
@@ -96,5 +103,9 @@ export class UsuariosPage implements OnInit {
 
   reactivar(usuario: Usuario) {
     this.api.updateUsuario(usuario.id, { estado: 'ACTIVO' }).subscribe(() => this.cargar());
+  }
+
+  severidadRol(rol: string) {
+    return rol === 'ADMIN' ? 'success' : 'secondary';
   }
 }

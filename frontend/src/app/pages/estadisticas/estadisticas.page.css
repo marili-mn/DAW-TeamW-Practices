@@ -13,7 +13,7 @@
 .card-total {
   background: #ffffff;
   border: 1px solid #cbd5e1;          /* slate-300 */
-  border-left: 4px solid #4338ca;     /* indigo-700 default */
+  border-left: 4px solid #047857;     /* emerald-700 default */
   border-radius: 0.85rem;
   padding: 1.4rem 1.5rem;
   display: grid;
@@ -34,7 +34,7 @@
   grid-column: 2;
   align-self: center;
   font-size: 2rem;
-  color: #4338ca;                     /* indigo-700 */
+  color: #047857;                     /* emerald-700 */
   opacity: 0.9;
 }
 
@@ -118,7 +118,7 @@
 }
 
 .seccion-grafico h3 i {
-  color: #4338ca;
+  color: #047857;
 }
 
 /* === Barras horizontales ================================================ */
@@ -141,7 +141,7 @@
 
 .barra-fill {
   height: 100%;
-  background: linear-gradient(90deg, #4338ca 0%, #6d28d9 100%); /* indigo→violet más oscuros */
+  background: linear-gradient(90deg, #047857 0%, #0d9488 100%); /* emerald→teal */
   transition: width 0.4s ease;
   border-radius: 0.5rem;
 }

@@ -1,19 +1,19 @@
 /* === Topbar ============================================================
-   Estilo "cabezal corporativo": fondo slate oscuro, links claros, link
-   activo con barrita de acento. Contrasta fuerte con el body gris claro. */
+   Topbar blanco con acentos emerald — recupera la paleta original del
+   proyecto con la legibilidad y estructura mejoradas. */
 
 .topbar {
   display: flex;
   align-items: center;
   gap: 1.5rem;
   padding: 0.75rem 1.5rem;
-  background: #1e293b;        /* slate-800 */
-  color: #f1f5f9;             /* slate-100 */
-  border-bottom: 1px solid #0f172a;
+  background: #ffffff;
+  color: #0f172a;             /* slate-900 */
+  border-bottom: 1px solid #e2e8f0;  /* slate-200 */
   position: sticky;
   top: 0;
   z-index: 10;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.2);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
 }
 
 .brand {
@@ -23,11 +23,11 @@
   align-items: center;
   gap: 0.5rem;
   white-space: nowrap;
-  color: #ffffff;
+  color: #0f172a;
 }
 
 .brand i {
-  color: #818cf8;             /* indigo-400 */
+  color: #047857;             /* emerald-700 */
 }
 
 .topbar nav {
@@ -41,7 +41,7 @@
   align-items: center;
   gap: 0.4rem;
   text-decoration: none;
-  color: #cbd5e1;             /* slate-300 */
+  color: #334155;             /* slate-700 */
   font-weight: 500;
   font-size: 0.92rem;
   padding: 0.5rem 0.85rem;
@@ -51,13 +51,13 @@
 }
 
 .topbar a:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: #ffffff;
+  background: rgba(5, 150, 105, 0.08);
+  color: #047857;
 }
 
 .topbar a.activo {
-  background: rgba(99, 102, 241, 0.18);
-  color: #ffffff;
+  background: rgba(5, 150, 105, 0.12);
+  color: #047857;
   font-weight: 600;
 }
 
@@ -68,13 +68,13 @@
   left: 0.85rem;
   right: 0.85rem;
   height: 2px;
-  background: #818cf8;        /* indigo-400 */
+  background: #047857;        /* emerald-700 */
   border-radius: 1px;
 }
 
 .topbar a.activo i,
 .topbar a:hover i {
-  color: #c7d2fe;             /* indigo-200 */
+  color: #059669;             /* emerald-600 */
 }
 
 .usuario-actual {
@@ -83,11 +83,11 @@
   gap: 0.5rem;
   font-size: 0.9rem;
   white-space: nowrap;
-  color: #cbd5e1;             /* slate-300 */
+  color: #475569;             /* slate-600 */
 }
 
 .usuario-actual i {
-  color: #94a3b8;             /* slate-400 */
+  color: #64748b;             /* slate-500 */
 }
 
 .rol-chip {
@@ -96,12 +96,12 @@
   letter-spacing: 0.04em;
   padding: 0.15rem 0.55rem;
   border-radius: 999px;
-  background: #475569;        /* slate-600 */
-  color: #f1f5f9;
+  background: #e2e8f0;        /* slate-200 */
+  color: #334155;             /* slate-700 */
 }
 
 .rol-chip.rol-admin {
-  background: #4338ca;        /* indigo-700 */
+  background: #047857;        /* emerald-700 */
   color: #ffffff;
 }
 
@@ -113,7 +113,8 @@
 }
 
 /* === Footer ============================================================
-   Reservado, slate-800 oscuro como el topbar para enmarcar la app. */
+   Slate-800 oscuro contrasta con el topbar blanco y cierra visualmente
+   la app. */
 .pie {
   background: #1e293b;
   color: #cbd5e1;

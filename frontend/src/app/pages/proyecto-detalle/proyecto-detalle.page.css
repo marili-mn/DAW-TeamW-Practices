@@ -33,7 +33,7 @@
 
 /* Mientras se arrastra una tarjeta, se resalta la zona donde soltar */
 .columna--activa {
-  outline: 2px dashed #4338ca;
+  outline: 2px dashed #047857;
   outline-offset: 2px;
 }
 

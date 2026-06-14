@@ -6,16 +6,16 @@
    y bajos para fondo, garantizando contraste WCAG AA. */
 
 :root {
-  --tfi-bg:          #e2e8f0;  /* fondo de la app (slate-200) */
+  --tfi-bg:          #f1f5f9;  /* fondo de la app (slate-100) */
   --tfi-surface:     #ffffff;  /* cards / tablas */
-  --tfi-surface-2:   #f1f5f9;  /* zonas hundidas (filtros, tracks) */
+  --tfi-surface-2:   #f8fafc;  /* zonas hundidas (slate-50) */
   --tfi-border:      #cbd5e1;  /* bordes definidos (slate-300) */
   --tfi-border-soft: #e2e8f0;  /* bordes sutiles (slate-200) */
   --tfi-text:        #0f172a;  /* texto principal (slate-900) */
   --tfi-text-2:      #334155;  /* texto secundario (slate-700) */
   --tfi-text-muted:  #64748b;  /* texto suave (slate-500) */
-  --tfi-primary:     #4338ca;  /* indigo-700 (acción) */
-  --tfi-primary-2:   #4f46e5;  /* indigo-600 */
+  --tfi-primary:     #047857;  /* emerald-700 (acción) */
+  --tfi-primary-2:   #059669;  /* emerald-600 */
 }
 
 * {
@@ -220,7 +220,7 @@ h3 {
 .p-inputtext:focus,
 .p-select.p-focus {
   border-color: var(--tfi-primary) !important;
-  box-shadow: 0 0 0 3px rgba(67, 56, 202, 0.15) !important;
+  box-shadow: 0 0 0 3px rgba(4, 120, 87, 0.15) !important;
 }
 
 /* === Tags de estado: colores saturados, texto bien legible ===============
