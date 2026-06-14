@@ -1,4 +1,4 @@
-﻿CREATE TYPE estados_usuarios AS ENUM ('ACTIVO','BAJA');
+CREATE TYPE estados_usuarios AS ENUM ('ACTIVO','BAJA');
 CREATE TYPE estados_clientes AS ENUM ('ACTIVO','BAJA');
 CREATE TYPE estados_proyectos AS ENUM ('ACTIVO','FINALIZADO','BAJA');
 CREATE TYPE estados_tareas AS ENUM ('PENDIENTE','FINALIZADA','BAJA');

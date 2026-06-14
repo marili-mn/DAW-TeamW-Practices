@@ -13,13 +13,15 @@ async function bootstrap() {
     new ValidationPipe({ whitelist: true, transform: true }),
   );
 
-  const config = new DocumentBuilder()
-    .setTitle('TFI - Gestión de Proyectos')
-    .setDescription('API del sistema de gestión de proyectos (DAW 2026)')
-    .setVersion('1.0')
-    .addBearerAuth()
-    .build();
-  SwaggerModule.setup('docs', app, SwaggerModule.createDocument(app, config));
+  if (process.env.NODE_ENV !== 'production' || process.env.SWAGGER === 'true') {
+    const config = new DocumentBuilder()
+      .setTitle('TFI - Gestión de Proyectos')
+      .setDescription('API del sistema de gestión de proyectos (DAW 2026)')
+      .setVersion('1.0')
+      .addBearerAuth()
+      .build();
+    SwaggerModule.setup('docs', app, SwaggerModule.createDocument(app, config));
+  }
 
   await app.listen(process.env.PORT ?? 3000);
 }

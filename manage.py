@@ -2,15 +2,17 @@
 """Orquestador del TFI - Sistema de Gestión de Proyectos (DAW 2026).
 
 Uso:
-    python manage.py setup    Instala dependencias (npm) y descarga nginx
-    python manage.py db       Crea rol/base de datos y ejecuta el script de la cátedra
-    python manage.py seed     Carga datos de demostración (seed-demo.sql)
-    python manage.py dev      Levanta backend (watch) y frontend (ng serve) en modo desarrollo
-    python manage.py build    Compila backend y frontend para producción
-    python manage.py start    Despliegue: backend con PM2 + nginx sirviendo el frontend
-    python manage.py stop     Detiene PM2 y nginx
-    python manage.py status   Estado detallado: DB, nginx, PM2 y puertos
-    python manage.py logs     Logs del backend en PM2
+    python manage.py setup       Instala dependencias (npm) y descarga nginx
+    python manage.py db          Crea rol/base de datos y ejecuta el script de la cátedra
+    python manage.py seed        Carga datos de demostración (seed-demo.sql)
+    python manage.py dev         Levanta backend (watch) y frontend (ng serve) en modo desarrollo
+    python manage.py build       Compila backend y frontend para producción
+    python manage.py start       Despliegue: backend con PM2 + nginx sirviendo el frontend
+    python manage.py stop        Detiene PM2 y nginx
+    python manage.py status      Estado detallado: DB, nginx, PM2 y puertos
+    python manage.py logs        Logs del backend en PM2
+    python manage.py swagger on  Habilita Swagger UI (reinicia backend si está corriendo)
+    python manage.py swagger off Deshabilita Swagger UI
 """
 
 import argparse
@@ -60,6 +62,31 @@ DB_USER = "Equipo-W"
 DB_PASS = "equipow"
 
 
+def leer_env() -> dict[str, str]:
+    """Lee backend/.env y devuelve sus variables como dict."""
+    env_file = os.path.join(BACKEND, ".env")
+    out: dict[str, str] = {}
+    if not os.path.isfile(env_file):
+        return out
+    with open(env_file, encoding="utf-8") as f:
+        for linea in f:
+            linea = linea.strip()
+            if linea and not linea.startswith("#") and "=" in linea:
+                k, _, v = linea.partition("=")
+                out[k.strip()] = v.strip()
+    return out
+
+
+def credenciales_db() -> tuple[str, str, str]:
+    """Devuelve (db_user, db_pass, db_name) leyendo .env con fallback a constantes."""
+    env = leer_env()
+    return (
+        env.get("DB_USER", DB_USER),
+        env.get("DB_PASS", DB_PASS),
+        env.get("DB_NAME", DB_NAME),
+    )
+
+
 def run(cmd: str, cwd: str | None = None, check: bool = True, env: dict | None = None) -> int:
     print(f"\n> {cmd}" + (f"  (en {os.path.relpath(cwd, ROOT)})" if cwd else ""))
     merged_env = {**os.environ, **(env or {})}
@@ -70,9 +97,18 @@ def run(cmd: str, cwd: str | None = None, check: bool = True, env: dict | None =
 
 
 def puerto_abierto(puerto: int) -> bool:
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.settimeout(1)
-        return s.connect_ex(("127.0.0.1", puerto)) == 0
+    for familia, host in (
+        (socket.AF_INET,  "127.0.0.1"),
+        (socket.AF_INET6, "::1"),
+    ):
+        try:
+            with socket.socket(familia, socket.SOCK_STREAM) as s:
+                s.settimeout(1)
+                if s.connect_ex((host, puerto)) == 0:
+                    return True
+        except OSError:
+            pass
+    return False
 
 
 def encontrar_psql() -> str:
@@ -124,41 +160,82 @@ def cmd_setup(_args) -> None:
 
 
 def cmd_db(args) -> None:
+    import getpass
     psql = encontrar_psql()
-    clave_postgres = args.password or os.environ.get("PGPASSWORD")
-    if not clave_postgres:
-        import getpass
+    db_user, db_pass, db_name = credenciales_db()
+    app_env = {"PGPASSWORD": db_pass}
 
-        clave_postgres = getpass.getpass("Clave del usuario postgres: ")
+    print(f"\n  Conexión: {db_user}@localhost/{db_name}")
 
-    env_admin = {"PGPASSWORD": clave_postgres}
-    run(
-        f'{psql} -U postgres -h localhost -c "CREATE ROLE \\"{DB_USER}\\" WITH LOGIN PASSWORD \'{DB_PASS}\';"',
-        check=False,
-        env=env_admin,
-    )
-    run(
-        f'{psql} -U postgres -h localhost -c "CREATE DATABASE {DB_NAME} OWNER \\"{DB_USER}\\";"',
-        check=False,
-        env=env_admin,
-    )
-    run(
-        f'{psql} -U "{DB_USER}" -h localhost -d {DB_NAME} -f "{DB_SCRIPT}"',
-        env={"PGPASSWORD": DB_PASS},
-    )
-    print("\nBase de datos lista. Credenciales de la app: usuario / clave")
+    # ── Si la base ya existe, solo aplicar el schema. ────────────────────────
+    db_ok = subprocess.run(
+        f'{psql} -U "{db_user}" -h localhost -d {db_name} -c "SELECT 1;"',
+        shell=True, env={**os.environ, **app_env}, capture_output=True,
+    ).returncode == 0
+
+    def necesita_admin() -> bool:
+        """True si el usuario de la app no puede crear objetos en el schema public."""
+        r = subprocess.run(
+            f'{psql} -U "{db_user}" -h localhost -d {db_name}'
+            f' -c "SELECT has_schema_privilege(current_user, \'public\', \'CREATE\');"',
+            shell=True, env={**os.environ, **app_env}, capture_output=True, text=True,
+        )
+        return "t" not in r.stdout
+
+    def ejecutar_como_admin(sqls: list[str]) -> None:
+        sin_pass = {k: v for k, v in os.environ.items() if k != "PGPASSWORD"}
+        # Intentar sin contraseña (SSPI / trust / .pgpass — funciona en la mayoría de instalaciones locales).
+        puede_sin_clave = subprocess.run(
+            f'{psql} -U postgres -h localhost -d postgres -c "SELECT 1;"',
+            shell=True, env=sin_pass, capture_output=True,
+        ).returncode == 0
+        if puede_sin_clave:
+            admin_env = sin_pass
+        else:
+            print(f"\n  Se necesita la clave del superusuario postgres una sola vez.")
+            clave_pg = args.password or getpass.getpass("  Clave de postgres: ")
+            admin_env = {**sin_pass, "PGPASSWORD": clave_pg}
+        for sql in sqls:
+            run(f'{psql} -U postgres -h localhost -c "{sql}"', check=False, env=admin_env)
+        run(
+            f'{psql} -U postgres -h localhost -d {db_name}'
+            f' -c "GRANT ALL ON SCHEMA public TO \\"{db_user}\\"; CREATE EXTENSION IF NOT EXISTS pgcrypto;"',
+            check=False, env=admin_env,
+        )
+
+    if not db_ok:
+        # Intentar crear la base con credenciales de la app (tiene CREATEDB desde
+        # la primera ejecución exitosa).
+        creada = subprocess.run(
+            f'{psql} -U "{db_user}" -h localhost -d postgres -c "CREATE DATABASE {db_name};"',
+            shell=True, env={**os.environ, **app_env}, capture_output=True,
+        ).returncode == 0
+
+        if not creada:
+            ejecutar_como_admin([
+                f'CREATE ROLE \\"{db_user}\\" WITH LOGIN PASSWORD \'{db_pass}\' CREATEDB',
+                f'CREATE DATABASE {db_name}',
+            ])
+    elif necesita_admin():
+        # Base existente pero sin permisos de schema (PostgreSQL 15+).
+        ejecutar_como_admin([])
+
+    # ── Aplicar schema (idempotente en re-runs gracias a IF NOT EXISTS) ───────
+    run(f'{psql} -U "{db_user}" -h localhost -d {db_name} -f "{DB_SCRIPT}"', env=app_env)
+    print("\nBase de datos lista. Login en la app: usuario / clave")
 
 
 def cmd_seed(_args) -> None:
     if not os.path.isfile(DB_SEED):
         sys.exit(f"No se encontró {DB_SEED}. Revisá que el archivo existe.")
     psql = encontrar_psql()
+    db_user, db_pass, db_name = credenciales_db()
     print(f"\nAplicando datos de demostración...")
     print(f"  Archivo  : {os.path.relpath(DB_SEED, ROOT)}")
-    print(f"  Conexión : {DB_USER}@localhost/{DB_NAME}")
+    print(f"  Conexión : {db_user}@localhost/{db_name}")
     run(
-        f'{psql} -U "{DB_USER}" -h localhost -d {DB_NAME} -f "{DB_SEED}"',
-        env={"PGPASSWORD": DB_PASS},
+        f'{psql} -U "{db_user}" -h localhost -d {db_name} -f "{DB_SEED}"',
+        env={"PGPASSWORD": db_pass},
     )
     print("\nSeed aplicado. Datos de demo listos para el video.")
 
@@ -226,13 +303,12 @@ def cmd_status(_args) -> None:
     print("  TFI — Estado del sistema")
     print(f"{'═' * 54}")
 
-    # ── Base de datos ────────────────────────────────────────
+    db_user, _, db_name = credenciales_db()
     print(f"\n  Base de datos")
     print(f"    Host    : localhost:5432")
-    print(f"    DB      : {DB_NAME}")
-    print(f"    Usuario : {DB_USER}")
+    print(f"    DB      : {db_name}")
+    print(f"    Usuario : {db_user}")
 
-    # ── nginx ────────────────────────────────────────────────
     nginx_exe = encontrar_nginx()
     print(f"\n  nginx")
     if nginx_exe:
@@ -246,27 +322,29 @@ def cmd_status(_args) -> None:
     else:
         print("    (no encontrado — ejecutá: python manage.py setup)")
 
-    # ── PM2 ─────────────────────────────────────────────────
     print(f"\n  PM2 — procesos\n{sep}")
     run("pm2 list", check=False)
     print(sep)
 
-    # ── Puertos y servicios ──────────────────────────────────
     backend_up = puerto_abierto(3000)
     nginx_up   = puerto_abierto(8080)
     dev_up     = puerto_abierto(4200)
-    swagger_ok = swagger_disponible() if backend_up else False
+    es_prod    = nginx_up
+    swagger_ok = (not es_prod) and swagger_disponible() if backend_up else False
 
-    def fila(ok: bool, puerto: int, nombre: str, url: str) -> str:
+    def fila(ok: bool, puerto: int, nombre: str, url: str, nota: str = "") -> str:
         icono = "✔" if ok else "✘"
-        destino = url if ok else "abajo"
+        destino = nota if nota else (url if ok else "abajo")
         return f"    {icono} :{puerto}  {nombre:<18} {destino}"
 
     print("  Servicios")
-    print(fila(backend_up, 3000, "Backend API",      "http://localhost:3000/api"))
-    print(fila(swagger_ok, 3000, "Swagger UI",       "http://localhost:3000/docs"))
-    print(fila(nginx_up,   8080, "nginx (prod)",     "http://localhost:8080"))
-    print(fila(dev_up,     4200, "Frontend dev",     "http://localhost:4200"))
+    print(fila(backend_up, 3000, "Backend API",  "http://localhost:3000/api"))
+    if es_prod:
+        print(f"    - :3000  {'Swagger UI':<18} deshabilitado (prod)")
+    else:
+        print(fila(swagger_ok, 3000, "Swagger UI",  "http://localhost:3000/docs"))
+    print(fila(nginx_up,   8080, "nginx (prod)", "http://localhost:8080"))
+    print(fila(dev_up,     4200, "Frontend dev", "http://localhost:4200"))
 
     print()
 
@@ -275,7 +353,57 @@ def cmd_logs(_args) -> None:
     run("pm2 logs tfi-backend --lines 50", check=False)
 
 
+def _escribir_env_var(clave: str, valor: str | None) -> None:
+    env_file = os.path.join(BACKEND, ".env")
+    lineas: list[str] = []
+    if os.path.isfile(env_file):
+        with open(env_file, encoding="utf-8") as f:
+            lineas = f.readlines()
+    lineas = [l for l in lineas if not l.strip().startswith(f"{clave}=")]
+    if valor is not None:
+        lineas.append(f"{clave}={valor}\n")
+    with open(env_file, "w", encoding="utf-8") as f:
+        f.writelines(lineas)
+
+
+def cmd_swagger(args) -> None:
+    env = leer_env()
+    activo = env.get("SWAGGER", "").lower() == "true"
+
+    if args.estado is None:
+        estado_str = "habilitado" if activo else "deshabilitado"
+        print(f"\n  Swagger UI: {estado_str}")
+        print("  Uso: python manage.py swagger on|off")
+        return
+
+    activar = args.estado == "on"
+    if activar == activo:
+        print(f"\n  Swagger ya estaba {'habilitado' if activar else 'deshabilitado'}.")
+        return
+
+    if activar:
+        _escribir_env_var("SWAGGER", "true")
+        print("\n  Swagger habilitado en backend/.env")
+    else:
+        _escribir_env_var("SWAGGER", None)
+        print("\n  Swagger deshabilitado (variable eliminada de backend/.env)")
+
+    if puerto_abierto(3000):
+        print("  Reiniciando backend para aplicar el cambio...")
+        run("pm2 restart tfi-backend --update-env", check=False)
+    else:
+        print("  Backend no esta corriendo. El cambio aplica al proximo start.")
+
+
 def main() -> None:
+    if sys.platform == "win32":
+        import ctypes
+        ctypes.windll.kernel32.SetConsoleOutputCP(65001)
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    if hasattr(sys.stderr, "reconfigure"):
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
     parser = argparse.ArgumentParser(
         prog="manage.py",
         description="Orquestador del TFI - Sistema de Gestión de Proyectos",
@@ -286,8 +414,8 @@ def main() -> None:
 
     sub.add_parser("setup", help="instala dependencias y descarga nginx").set_defaults(fn=cmd_setup)
 
-    p_db = sub.add_parser("db", help="crea rol/base y ejecuta el script SQL")
-    p_db.add_argument("--password", help="clave del usuario postgres (o usa PGPASSWORD)")
+    p_db = sub.add_parser("db", help="aplica el schema SQL (primera vez pide clave de postgres)")
+    p_db.add_argument("--password", help="clave de postgres (solo primera vez, opcional)")
     p_db.set_defaults(fn=cmd_db)
 
     sub.add_parser("seed", help="carga datos de demostración (seed-demo.sql)").set_defaults(fn=cmd_seed)
@@ -302,6 +430,10 @@ def main() -> None:
     sub.add_parser("stop", help="detiene PM2 y nginx").set_defaults(fn=cmd_stop)
     sub.add_parser("status", help="estado de servicios").set_defaults(fn=cmd_status)
     sub.add_parser("logs", help="logs del backend").set_defaults(fn=cmd_logs)
+
+    p_swagger = sub.add_parser("swagger", help="habilita o deshabilita Swagger UI en produccion")
+    p_swagger.add_argument("estado", nargs="?", choices=["on", "off"], help="on|off (sin argumento muestra el estado)")
+    p_swagger.set_defaults(fn=cmd_swagger)
 
     args = parser.parse_args()
     args.fn(args)
