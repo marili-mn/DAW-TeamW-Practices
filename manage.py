@@ -23,6 +23,14 @@ import sys
 import urllib.request
 import zipfile
 
+
+def swagger_disponible() -> bool:
+    try:
+        with urllib.request.urlopen("http://localhost:3000/docs", timeout=2) as r:
+            return r.status == 200
+    except Exception:
+        return False
+
 ROOT = os.path.dirname(os.path.abspath(__file__))
 BACKEND = os.path.join(ROOT, "backend")
 FRONTEND = os.path.join(ROOT, "frontend")
@@ -243,22 +251,22 @@ def cmd_status(_args) -> None:
     run("pm2 list", check=False)
     print(sep)
 
-    # ── Puertos ──────────────────────────────────────────────
-    print("  Puertos")
-    checks = [
-        (3000, "Backend API",   "http://localhost:3000/api"),
-        (3000, "Swagger docs",  "http://localhost:3000/docs"),
-        (8080, "nginx (prod)",  "http://localhost:8080"),
-        (4200, "Frontend dev",  "http://localhost:4200"),
-    ]
-    seen_ports: set[int] = set()
-    for puerto, nombre, url in checks:
-        if puerto not in seen_ports:
-            ok = puerto_abierto(puerto)
-            seen_ports.add(puerto)
+    # ── Puertos y servicios ──────────────────────────────────
+    backend_up = puerto_abierto(3000)
+    nginx_up   = puerto_abierto(8080)
+    dev_up     = puerto_abierto(4200)
+    swagger_ok = swagger_disponible() if backend_up else False
+
+    def fila(ok: bool, puerto: int, nombre: str, url: str) -> str:
         icono = "✔" if ok else "✘"
-        estado = url if ok else "abajo"
-        print(f"    {icono} :{puerto}  {nombre:<16} {estado}")
+        destino = url if ok else "abajo"
+        return f"    {icono} :{puerto}  {nombre:<18} {destino}"
+
+    print("  Servicios")
+    print(fila(backend_up, 3000, "Backend API",      "http://localhost:3000/api"))
+    print(fila(swagger_ok, 3000, "Swagger UI",       "http://localhost:3000/docs"))
+    print(fila(nginx_up,   8080, "nginx (prod)",     "http://localhost:8080"))
+    print(fila(dev_up,     4200, "Frontend dev",     "http://localhost:4200"))
 
     print()
 
