@@ -11,6 +11,9 @@
       <a routerLink="/clientes" routerLinkActive="activo">
         <i class="pi pi-users"></i><span>Clientes</span>
       </a>
+      <a routerLink="/estadisticas" routerLinkActive="activo">
+        <i class="pi pi-chart-bar"></i><span>Estadísticas</span>
+      </a>
       @if (auth.esAdmin()) {
         <a routerLink="/historial" routerLinkActive="activo">
           <i class="pi pi-history"></i><span>Historial</span>

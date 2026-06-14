@@ -1,0 +1,91 @@
+<div class="page-header">
+  <h2><i class="pi pi-chart-bar"></i> Estadísticas</h2>
+</div>
+
+@if (cargando()) {
+  <p class="texto-suave">Cargando métricas...</p>
+} @else if (data(); as e) {
+  <!-- Cards de totales: 6 indicadores rápidos -->
+  <div class="cards-totales">
+    <div class="card-total">
+      <span class="card-numero">{{ e.totales.proyectos }}</span>
+      <span class="card-label">Proyectos totales</span>
+    </div>
+    <div class="card-total">
+      <span class="card-numero">{{ e.totales.proyectosActivos }}</span>
+      <span class="card-label">Proyectos activos</span>
+    </div>
+    <div class="card-total" [class.card-alerta]="e.proyectosAtrasados > 0">
+      <span class="card-numero">{{ e.proyectosAtrasados }}</span>
+      <span class="card-label">Proyectos atrasados</span>
+    </div>
+    <div class="card-total">
+      <span class="card-numero">{{ e.totales.clientesActivos }}</span>
+      <span class="card-label">Clientes activos</span>
+    </div>
+    <div class="card-total">
+      <span class="card-numero">{{ e.totales.tareasPendientes }}</span>
+      <span class="card-label">Tareas pendientes</span>
+    </div>
+    <div class="card-total">
+      <span class="card-numero">{{ e.totales.tareas }}</span>
+      <span class="card-label">Tareas totales</span>
+    </div>
+  </div>
+
+  <!-- Distribución por estado: barras horizontales con porcentaje -->
+  <div class="seccion-grafico">
+    <h3>Proyectos por estado</h3>
+    @for (item of e.proyectosPorEstado; track item.estado) {
+      <div class="barra-fila">
+        <p-tag [value]="item.estado" [severity]="severidadProyecto(item.estado)" />
+        <div class="barra-contenedor">
+          <div
+            class="barra-fill"
+            [style.width.%]="porcentaje(item.cantidad, maxProyectos())"
+          ></div>
+        </div>
+        <span class="barra-valor">{{ item.cantidad }}</span>
+      </div>
+    } @empty {
+      <p class="texto-suave">Sin proyectos cargados.</p>
+    }
+  </div>
+
+  <div class="seccion-grafico">
+    <h3>Tareas por estado</h3>
+    @for (item of e.tareasPorEstado; track item.estado) {
+      <div class="barra-fila">
+        <p-tag [value]="item.estado" [severity]="severidadTarea(item.estado)" />
+        <div class="barra-contenedor">
+          <div
+            class="barra-fill"
+            [style.width.%]="porcentaje(item.cantidad, maxTareas())"
+          ></div>
+        </div>
+        <span class="barra-valor">{{ item.cantidad }}</span>
+      </div>
+    } @empty {
+      <p class="texto-suave">Sin tareas cargadas.</p>
+    }
+  </div>
+
+  <!-- Ranking clientes -->
+  <div class="seccion-grafico">
+    <h3>Top clientes por cantidad de proyectos</h3>
+    @for (item of e.topClientes; track item.cliente) {
+      <div class="barra-fila">
+        <span class="cliente-nombre">{{ item.cliente }}</span>
+        <div class="barra-contenedor">
+          <div
+            class="barra-fill barra-fill--cliente"
+            [style.width.%]="porcentaje(item.proyectos, maxClientes())"
+          ></div>
+        </div>
+        <span class="barra-valor">{{ item.proyectos }}</span>
+      </div>
+    } @empty {
+      <p class="texto-suave">No hay proyectos con cliente asignado.</p>
+    }
+  </div>
+}

@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { API_URL } from './api.config';
 import {
   Cliente,
+  Estadisticas,
   EstadoProyecto,
   EstadoTarea,
   Historial,
@@ -105,6 +106,11 @@ export class ApiService {
   // Historial de cambios
   getHistorial() {
     return this.http.get<Historial[]>(`${API_URL}/historial`);
+  }
+
+  // Estadísticas (dashboard)
+  getEstadisticas() {
+    return this.http.get<Estadisticas>(`${API_URL}/estadisticas`);
   }
 
   // Export CSV (devuelve Blob; el interceptor sigue agregando el token)

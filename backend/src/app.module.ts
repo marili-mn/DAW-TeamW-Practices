@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { ClientesModule } from './clientes/clientes.module';
+import { EstadisticasModule } from './estadisticas/estadisticas.module';
 import { HistorialModule } from './historial/historial.module';
 import { ProyectosModule } from './proyectos/proyectos.module';
 import { TareasModule } from './tareas/tareas.module';
@@ -30,6 +31,7 @@ import { UsuariosModule } from './usuarios/usuarios.module';
     TareasModule,
     HistorialModule,
     UsuariosModule,
+    EstadisticasModule,
   ],
 })
 export class AppModule {}

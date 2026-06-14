@@ -40,3 +40,18 @@ export interface Usuario {
   nombre: string;
   estado: EstadoUsuario;
 }
+
+export interface Estadisticas {
+  proyectosPorEstado: { estado: string; cantidad: number }[];
+  tareasPorEstado: { estado: string; cantidad: number }[];
+  topClientes: { cliente: string; proyectos: number }[];
+  proyectosAtrasados: number;
+  totales: {
+    proyectos: number;
+    proyectosActivos: number;
+    clientes: number;
+    clientesActivos: number;
+    tareas: number;
+    tareasPendientes: number;
+  };
+}
