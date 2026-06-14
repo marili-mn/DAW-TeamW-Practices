@@ -9,6 +9,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { ApiService } from '../../core/api.service';
+import { descargarBlob } from '../../core/download.util';
 import { Cliente } from '../../core/models';
 
 @Component({
@@ -133,6 +134,18 @@ export class ClientesPage {
 
   reactivar(cliente: Cliente): void {
     this.cambiarEstado(cliente, 'ACTIVO');
+  }
+
+  exportarCsv(): void {
+    this.api.exportClientesCsv().subscribe({
+      next: (blob) => descargarBlob(blob, 'clientes.csv'),
+      error: () =>
+        this.messages.add({
+          severity: 'error',
+          summary: 'No se pudo exportar',
+          life: 3000,
+        }),
+    });
   }
 
   private cambiarEstado(cliente: Cliente, estado: 'ACTIVO' | 'BAJA'): void {

@@ -1,6 +1,15 @@
 <div class="page-header">
   <h2>Proyectos</h2>
-  <p-button label="Nuevo proyecto" icon="pi pi-plus" (onClick)="abrirNuevo()" />
+  <div class="acciones-tareas">
+    <p-button
+      label="Exportar CSV"
+      icon="pi pi-download"
+      severity="secondary"
+      [outlined]="true"
+      (onClick)="exportarCsv()"
+    />
+    <p-button label="Nuevo proyecto" icon="pi pi-plus" (onClick)="abrirNuevo()" />
+  </div>
 </div>
 
 <div class="tabla-card">

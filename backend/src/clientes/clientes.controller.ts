@@ -7,10 +7,13 @@ import {
   Patch,
   Post,
   Query,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+import type { Response } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { enviarCsv, toCsv } from '../common/csv.util';
 import { EstadoCliente } from './cliente.entity';
 import { ClientesService } from './clientes.service';
 import { CreateClienteDto } from './dto/create-cliente.dto';
@@ -27,6 +30,28 @@ export class ClientesController {
   @ApiQuery({ name: 'estado', enum: EstadoCliente, required: false })
   findAll(@Query('estado') estado?: EstadoCliente) {
     return this.clientesService.findAll(estado);
+  }
+
+  @Get('export.csv')
+  async exportCsv(@Res() res: Response) {
+    const clientes = await this.clientesService.findAll();
+    const csv = toCsv(
+      clientes.map((c) => ({
+        id: c.id,
+        nombre: c.nombre,
+        estado: c.estado,
+        telefono: c.telefono ?? '',
+        email: c.email ?? '',
+      })),
+      [
+        { key: 'id', etiqueta: 'ID' },
+        { key: 'nombre', etiqueta: 'Nombre' },
+        { key: 'estado', etiqueta: 'Estado' },
+        { key: 'telefono', etiqueta: 'Teléfono' },
+        { key: 'email', etiqueta: 'Email' },
+      ],
+    );
+    enviarCsv(res, 'clientes.csv', csv);
   }
 
   @Get(':id')

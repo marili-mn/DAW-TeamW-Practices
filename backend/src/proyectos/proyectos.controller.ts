@@ -6,10 +6,13 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import type { Response } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { enviarCsv, toCsv } from '../common/csv.util';
 import { CreateProyectoDto } from './dto/create-proyecto.dto';
 import { UpdateProyectoDto } from './dto/update-proyecto.dto';
 import { ProyectosService } from './proyectos.service';
@@ -24,6 +27,27 @@ export class ProyectosController {
   @Get()
   findAll() {
     return this.proyectosService.findAll();
+  }
+
+  // CSV antes del ':id' para que no colisione con findOne.
+  @Get('export.csv')
+  async exportCsv(@Res() res: Response) {
+    const proyectos = await this.proyectosService.findAll();
+    const filas = proyectos.map((p) => ({
+      id: p.id,
+      nombre: p.nombre,
+      estado: p.estado,
+      cliente: p.cliente?.nombre ?? '',
+      fecha_fin: p.fechaFin ?? '',
+    }));
+    const csv = toCsv(filas, [
+      { key: 'id', etiqueta: 'ID' },
+      { key: 'nombre', etiqueta: 'Nombre' },
+      { key: 'estado', etiqueta: 'Estado' },
+      { key: 'cliente', etiqueta: 'Cliente' },
+      { key: 'fecha_fin', etiqueta: 'Fecha fin' },
+    ]);
+    enviarCsv(res, 'proyectos.csv', csv);
   }
 
   @Get(':id')

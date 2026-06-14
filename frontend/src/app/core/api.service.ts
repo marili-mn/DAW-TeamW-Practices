@@ -87,6 +87,19 @@ export class ApiService {
     return this.http.get<Historial[]>(`${API_URL}/historial`);
   }
 
+  // Export CSV (devuelve Blob; el interceptor sigue agregando el token)
+  exportProyectosCsv() {
+    return this.http.get(`${API_URL}/proyectos/export.csv`, {
+      responseType: 'blob',
+    });
+  }
+
+  exportClientesCsv() {
+    return this.http.get(`${API_URL}/clientes/export.csv`, {
+      responseType: 'blob',
+    });
+  }
+
   // Usuarios
   getUsuarios() {
     return this.http.get<Usuario[]>(`${API_URL}/usuarios`);

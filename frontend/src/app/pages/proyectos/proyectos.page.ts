@@ -11,6 +11,7 @@ import { SelectModule } from 'primeng/select';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { ApiService } from '../../core/api.service';
+import { descargarBlob } from '../../core/download.util';
 import { Cliente, EstadoProyecto, Proyecto } from '../../core/models';
 
 @Component({
@@ -207,5 +208,17 @@ export class ProyectosPage {
   estaAtrasado(p: Proyecto): boolean {
     const dias = this.diasRestantes(p);
     return p.estado === 'ACTIVO' && dias !== null && dias < 0;
+  }
+
+  exportarCsv(): void {
+    this.api.exportProyectosCsv().subscribe({
+      next: (blob) => descargarBlob(blob, 'proyectos.csv'),
+      error: () =>
+        this.messages.add({
+          severity: 'error',
+          summary: 'No se pudo exportar',
+          life: 3000,
+        }),
+    });
   }
 }
